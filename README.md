@@ -1,4 +1,4 @@
-# ✝️ Anointed
+# Anointed
 
 **Anointed** is a faith-based social platform that connects believers, fuels spiritual growth, and makes community engagement fun through gamification.  
 It’s a safe, uplifting space where users can share prayer requests, join groups, track their Fruits of the Spirit XP, and receive AI-powered encouragements backed by Scripture.
