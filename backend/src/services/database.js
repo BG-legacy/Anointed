@@ -13,19 +13,44 @@ class Database {
 
   async connect() {
     try {
+      // Determine the database URL based on environment
+      const dbUrl =
+        config.supabase.databaseUrl[config.nodeEnv] || config.database.url;
+
       this.pool = new Pool({
-        connectionString: config.database.url,
+        connectionString: dbUrl,
         max: config.database.maxConnections,
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 2000,
+        // Apply Supabase Postgres connection parameters
+        options: `-c statement_timeout=${config.database.statementTimeout} -c idle_in_transaction_session_timeout=${config.database.idleInTransactionSessionTimeout}`,
       });
 
-      // Test the connection
+      // Test the connection and apply session-level parameters
       const client = await this.pool.connect();
+
+      // Ensure extensions are available (they should be installed at database level)
+      try {
+        await client.query(`
+          SET statement_timeout = '${config.database.statementTimeout}';
+          SET idle_in_transaction_session_timeout = '${config.database.idleInTransactionSessionTimeout}';
+        `);
+        logger.info('Applied database session parameters successfully');
+      } catch (paramError) {
+        logger.warn(
+          'Could not apply database session parameters:',
+          paramError.message,
+        );
+      }
+
       client.release();
 
       this.isConnected = true;
-      logger.info('Successfully connected to PostgreSQL database');
+      logger.info('Successfully connected to PostgreSQL database', {
+        environment: config.nodeEnv,
+        statementTimeout: config.database.statementTimeout,
+        idleTimeout: config.database.idleInTransactionSessionTimeout,
+      });
 
       return this.pool;
     } catch (error) {

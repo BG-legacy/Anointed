@@ -17,7 +17,7 @@ const errorHandler = (logger) => {
           body: req.body,
         },
       },
-      'Request error'
+      'Request error',
     );
 
     // Default error

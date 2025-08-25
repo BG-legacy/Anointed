@@ -1,9 +1,16 @@
 -- Initial database setup for Anointed application
 -- This script runs when the PostgreSQL container is first created
 
--- Create extensions
+-- Create required extensions for Supabase Postgres
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "pg_trgm";
+CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";
+CREATE EXTENSION IF NOT EXISTS "btree_gin"; -- Optional but recommended
+
+-- Set database parameters for performance and security
+ALTER DATABASE anointed SET statement_timeout = '10s';
+ALTER DATABASE anointed SET idle_in_transaction_session_timeout = '10s';
 
 -- Create users table (example)
 CREATE TABLE IF NOT EXISTS users (
