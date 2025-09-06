@@ -14,7 +14,12 @@
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
     "format": "prettier --write src/**/*.js",
-    "format:check": "prettier --check src/**/*.js"
+    "format:check": "prettier --check src/**/*.js",
+    "db:generate": "npx prisma generate",
+    "db:migrate": "npx prisma migrate dev",
+    "db:reset": "npx prisma migrate reset",
+    "db:deploy": "npx prisma migrate deploy",
+    "db:studio": "npx prisma studio"
   },
   "keywords": [
     "express",
@@ -26,6 +31,7 @@
   "license": "ISC",
   "description": "Express 5 API server with modern tooling",
   "dependencies": {
+    "@prisma/client": "^6.15.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^5.0.1",
@@ -34,7 +40,8 @@
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.12.0",
     "pino": "^9.8.0",
-    "pino-pretty": "^13.1.1"
+    "pino-pretty": "^13.1.1",
+    "prisma": "^6.15.0"
   },
   "devDependencies": {
     "@testcontainers/postgresql": "^10.13.2",

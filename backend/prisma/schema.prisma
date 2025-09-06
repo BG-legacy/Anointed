@@ -1,0 +1,136 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// USERS & AUTHENTICATION
+// =============================================================================
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  displayName  String?   @map("display_name")
+  avatarUrl    String?   @map("avatar_url")
+  tz           String?   @map("timezone") // Timezone preference
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+  deletedAt    DateTime? @map("deleted_at") // Soft delete
+
+  // Relations
+  userSettings   UserSettings?
+  devices        Device[]
+  refreshTokens  RefreshToken[]
+  passwordResets PasswordReset[]
+  magicLinks     MagicLink[]
+
+  @@map("users")
+}
+
+model UserSettings {
+  userId           String   @id @map("user_id") @db.Uuid
+  bibleTranslation String?  @map("bible_translation") // e.g., "NIV", "ESV", "NASB"
+  denomination     String?  @map("denomination") // e.g., "Baptist", "Methodist", "Catholic"
+  quietTimeStart   String?  @map("quiet_time_start") // e.g., "06:00" (24-hour format)
+  quietTimeEnd     String?  @map("quiet_time_end") // e.g., "07:00" (24-hour format)
+  pushOptIn        Boolean  @default(true) @map("push_opt_in")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+model Device {
+  id         String    @id @default(uuid()) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  platform   String // e.g., "ios", "android", "web"
+  pushToken  String    @map("push_token")
+  lastSeenAt DateTime? @map("last_seen_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([userId, pushToken], name: "unique_user_push_token")
+  @@map("devices")
+}
+
+// =============================================================================
+// AUTHENTICATION AUXILIARY MODELS
+// =============================================================================
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @map("token_hash") @db.Text // Hashed refresh token
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at") // Nullable - set when token is revoked
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("refresh_tokens")
+}
+
+model PasswordReset {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @map("token_hash") @db.Text // Hashed reset token
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at") // Nullable - set when token is used
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([expiresAt])
+  @@map("password_resets")
+}
+
+model MagicLink {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @map("token_hash") @db.Text // Hashed magic link token
+  purpose   String // e.g., "login", "signup", "email_verification"
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at") // Nullable - set when link is used
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@index([tokenHash])
+  @@index([purpose])
+  @@index([expiresAt])
+  @@map("magic_links")
+}
