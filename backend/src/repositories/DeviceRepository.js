@@ -1,6 +1,6 @@
 /**
  * Device Repository
- * 
+ *
  * Handles all database operations for Device model.
  */
 
@@ -31,7 +31,7 @@ class DeviceRepository {
           },
         },
       });
-      
+
       logger.info(`Device created for user: ${deviceData.userId}, platform: ${deviceData.platform}`);
       return device;
     } catch (error) {
@@ -143,7 +143,7 @@ class DeviceRepository {
           },
         },
       });
-      
+
       logger.info(`Device updated: ${device.id}`);
       return device;
     } catch (error) {
@@ -201,7 +201,7 @@ class DeviceRepository {
           },
         },
       });
-      
+
       logger.info(`Device upserted for user: ${userId}, platform: ${deviceData.platform}`);
       return device;
     } catch (error) {
@@ -220,7 +220,7 @@ class DeviceRepository {
       const device = await this.prisma.device.delete({
         where: { id },
       });
-      
+
       logger.info(`Device deleted: ${device.id}`);
       return device;
     } catch (error) {
@@ -239,7 +239,7 @@ class DeviceRepository {
       const result = await this.prisma.device.deleteMany({
         where: { userId },
       });
-      
+
       logger.info(`Deleted ${result.count} devices for user: ${userId}`);
       return result;
     } catch (error) {
@@ -283,7 +283,7 @@ class DeviceRepository {
     try {
       const cutoffDate = new Date();
       cutoffDate.setDate(cutoffDate.getDate() - days);
-      
+
       return await this.prisma.device.findMany({
         where: {
           lastSeenAt: {
@@ -318,7 +318,7 @@ class DeviceRepository {
         where: { userId },
         select: { pushToken: true, platform: true },
       });
-      
+
       return devices.map(device => ({
         token: device.pushToken,
         platform: device.platform,

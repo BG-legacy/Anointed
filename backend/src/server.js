@@ -96,14 +96,14 @@ if (config.nodeEnv !== 'test') {
 // Graceful shutdown
 const gracefulShutdown = async (signal) => {
   logger.info(`Received ${signal}. Starting graceful shutdown...`);
-  
+
   try {
     // Close database and Redis connections
     await Promise.all([
       database.disconnect(),
       redis.disconnect(),
     ]);
-    
+
     if (server) {
       server.close(() => {
         logger.info('HTTP server closed.');

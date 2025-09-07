@@ -2,7 +2,7 @@
 
 /**
  * Enable Supabase Extensions Script
- * 
+ *
  * This script connects to your Supabase database and enables
  * the required extensions for the Anointed application.
  */
@@ -37,11 +37,11 @@ async function enableSupabaseExtensions() {
       { name: 'pgcrypto', description: 'Cryptographic functions' },
       { name: 'pg_trgm', description: 'Trigram similarity for fuzzy text search' },
       { name: 'pg_stat_statements', description: 'Query execution statistics' },
-      { name: 'btree_gin', description: 'GIN indexes for btree operations' }
+      { name: 'btree_gin', description: 'GIN indexes for btree operations' },
     ];
 
     console.log('🔌 Enabling extensions...');
-    
+
     for (const ext of extensions) {
       try {
         console.log(`  🔄 Installing ${ext.name}...`);

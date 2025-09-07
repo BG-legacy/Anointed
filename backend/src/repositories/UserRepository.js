@@ -1,6 +1,6 @@
 /**
  * User Repository
- * 
+ *
  * Handles all database operations for User model including soft deletes.
  */
 
@@ -26,7 +26,7 @@ class UserRepository {
           devices: true,
         },
       });
-      
+
       logger.info(`User created: ${user.email}`);
       return user;
     } catch (error) {
@@ -97,7 +97,7 @@ class UserRepository {
           devices: true,
         },
       });
-      
+
       logger.info(`User updated: ${user.email}`);
       return user;
     } catch (error) {
@@ -117,7 +117,7 @@ class UserRepository {
         where: { id },
         data: { deletedAt: new Date() },
       });
-      
+
       logger.info(`User soft deleted: ${user.email}`);
       return user;
     } catch (error) {
@@ -141,7 +141,7 @@ class UserRepository {
           devices: true,
         },
       });
-      
+
       logger.info(`User restored: ${user.email}`);
       return user;
     } catch (error) {
@@ -160,7 +160,7 @@ class UserRepository {
       const user = await this.prisma.user.delete({
         where: { id },
       });
-      
+
       logger.info(`User permanently deleted: ${user.email}`);
       return user;
     } catch (error) {
@@ -177,7 +177,7 @@ class UserRepository {
   async findAll(options = {}) {
     try {
       const { skip = 0, take = 50, where = {} } = options;
-      
+
       return await this.prisma.user.findMany({
         where: {
           ...where,
@@ -230,7 +230,7 @@ class UserRepository {
         },
         select: { id: true },
       });
-      
+
       return !!user;
     } catch (error) {
       logger.error('Error checking email existence:', error);

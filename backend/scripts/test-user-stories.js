@@ -2,10 +2,10 @@
 
 /**
  * User Stories Integration Test
- * 
+ *
  * This script tests complete user stories against your live Supabase database:
  * 1. User Registration
- * 2. User Authentication  
+ * 2. User Authentication
  * 3. Session Management
  * 4. Fuzzy Search
  * 5. User Management
@@ -36,12 +36,12 @@ async function testUserStories() {
     // Test Story 1: User Registration
     console.log('TEST 1 - USER STORY: User Registration');
     console.log('As a new user, I want to register with email and password');
-    
+
     const testUser = {
       email: `testuser.${Date.now()}@anointed.com`,
       password: 'SecurePassword123!',
       firstName: 'John',
-      lastName: 'Doe'
+      lastName: 'Doe',
     };
 
     const registerResult = await client.query(`
@@ -89,7 +89,7 @@ async function testUserStories() {
     console.log('As an authenticated user, I want to maintain my session');
 
     const sessionToken = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Create session
     const sessionResult = await client.query(`
       INSERT INTO sessions (user_id, token_hash, expires_at)
@@ -127,7 +127,7 @@ async function testUserStories() {
       ['bob.builder@anointed.com', 'Bob', 'Builder'],
       ['carol.singer@anointed.com', 'Carol', 'Singer'],
       ['david.dancer@anointed.com', 'David', 'Dancer'],
-      ['alice.smith@anointed.com', 'Alice', 'Smith']
+      ['alice.smith@anointed.com', 'Alice', 'Smith'],
     ];
 
     console.log('  INFO - Creating test users for search...');
@@ -286,14 +286,14 @@ async function testUserStories() {
     console.log('  PASSED - Advanced Search - Full-text search across all fields');
     console.log('  PASSED - Data Integrity - Foreign keys and constraints work properly');
     console.log('  PASSED - Performance - Queries execute quickly with proper indexes');
-    
+
     console.log('\nSECURITY - Features Verified:');
     console.log('  PASSED - Password encryption using bcrypt (pgcrypto)');
     console.log('  PASSED - Session token hashing');
     console.log('  PASSED - SQL injection protection with parameterized queries');
     console.log('  PASSED - Unique email constraint enforcement');
     console.log('  PASSED - Referential integrity with foreign keys');
-    
+
     console.log('\nSEARCH - Features Verified:');
     console.log('  PASSED - Exact text matching');
     console.log('  PASSED - Fuzzy search with trigram similarity');

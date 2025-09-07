@@ -1,13 +1,10 @@
-import { describe, test, expect, beforeAll } from '@jest/globals';
+import { describe, test, expect } from '@jest/globals';
 import { config } from '../../config/index.js';
 import { database } from '../../services/database.js';
-import pg from 'pg';
-
-const { Pool } = pg;
 
 /**
  * Supabase Configuration Tests
- * 
+ *
  * These tests validate the Supabase configuration without requiring Docker.
  * They test the configuration loading and connection setup.
  */
@@ -20,39 +17,39 @@ describe('Supabase Configuration Tests', () => {
       expect(config.supabase.databaseUrl.development).toBeDefined();
       expect(config.supabase.databaseUrl.staging).toBeDefined();
       expect(config.supabase.databaseUrl.production).toBeDefined();
-      
-             console.log('PASSED - Supabase URL:', config.supabase.url);
-       console.log('PASSED - Environment:', config.nodeEnv);
+
+      console.log('PASSED - Supabase URL:', config.supabase.url);
+      console.log('PASSED - Environment:', config.nodeEnv);
     });
 
     test('should have database timeout parameters configured', () => {
       expect(config.database.statementTimeout).toBe('10s');
       expect(config.database.idleInTransactionSessionTimeout).toBe('10s');
-      
-             console.log('PASSED - Statement timeout:', config.database.statementTimeout);
-       console.log('PASSED - Idle timeout:', config.database.idleInTransactionSessionTimeout);
+
+      console.log('PASSED - Statement timeout:', config.database.statementTimeout);
+      console.log('PASSED - Idle timeout:', config.database.idleInTransactionSessionTimeout);
     });
 
     test('should validate Supabase URL format', () => {
       const supabaseUrlPattern = /^https:\/\/[a-z0-9]+\.supabase\.co$/;
       expect(config.supabase.url).toMatch(supabaseUrlPattern);
-      
-             console.log('PASSED - Supabase URL format is valid');
+
+      console.log('PASSED - Supabase URL format is valid');
     });
 
     test('should validate database URL format', () => {
       const dbUrl = config.supabase.databaseUrl[config.nodeEnv] || config.database.url;
       const postgresUrlPattern = /^postgresql:\/\//;
       expect(dbUrl).toMatch(postgresUrlPattern);
-      
-             console.log('PASSED - Database URL format is valid');
+
+      console.log('PASSED - Database URL format is valid');
     });
 
     test('should have proper connection pool configuration', () => {
       expect(config.database.maxConnections).toBeGreaterThan(0);
       expect(typeof config.database.maxConnections).toBe('number');
-      
-             console.log('PASSED - Max connections:', config.database.maxConnections);
+
+      console.log('PASSED - Max connections:', config.database.maxConnections);
     });
   });
 
@@ -62,20 +59,18 @@ describe('Supabase Configuration Tests', () => {
       expect(typeof database.connect).toBe('function');
       expect(typeof database.query).toBe('function');
       expect(typeof database.healthCheck).toBe('function');
-      
-             console.log('PASSED - Database service instance created');
+
+      console.log('PASSED - Database service instance created');
     });
 
     test('should configure connection options correctly', () => {
       // Test that the Pool configuration would be set up correctly
-      const dbUrl = config.supabase.databaseUrl[config.nodeEnv] || config.database.url;
-      
       const expectedOptions = `-c statement_timeout=${config.database.statementTimeout} -c idle_in_transaction_session_timeout=${config.database.idleInTransactionSessionTimeout}`;
-      
+
       expect(expectedOptions).toContain('statement_timeout=10s');
       expect(expectedOptions).toContain('idle_in_transaction_session_timeout=10s');
-      
-             console.log('PASSED - Connection options configured:', expectedOptions);
+
+      console.log('PASSED - Connection options configured:', expectedOptions);
     });
   });
 
@@ -87,25 +82,25 @@ describe('Supabase Configuration Tests', () => {
       expect(config.jwt.expiresIn).toBeDefined();
       expect(config.jwt.refreshSecret).toBeDefined();
       expect(config.jwt.refreshExpiresIn).toBeDefined();
-      
-             console.log('PASSED - JWT configuration ready for user authentication');
+
+      console.log('PASSED - JWT configuration ready for user authentication');
     });
 
     test('should have CORS configured for frontend integration', () => {
       expect(config.corsOrigin).toBeDefined();
       expect(typeof config.corsOrigin).toBe('string');
-      
-             console.log('PASSED - CORS origin:', config.corsOrigin);
+
+      console.log('PASSED - CORS origin:', config.corsOrigin);
     });
 
     test('should have rate limiting configured for API protection', () => {
       expect(config.rateLimit).toBeDefined();
       expect(config.rateLimit.windowMs).toBeGreaterThan(0);
       expect(config.rateLimit.max).toBeGreaterThan(0);
-      
-             console.log('PASSED - Rate limiting:', {
+
+      console.log('PASSED - Rate limiting:', {
         windowMs: config.rateLimit.windowMs,
-        max: config.rateLimit.max
+        max: config.rateLimit.max,
       });
     });
 
@@ -114,15 +109,15 @@ describe('Supabase Configuration Tests', () => {
       expect(config.supabase.serviceRoleKey).toBeDefined();
       expect(config.supabase.anonKey).toBeDefined();
       expect(config.supabase.bucket).toBeDefined();
-      
-      const hasRealServiceKey = !config.supabase.serviceRoleKey.includes('placeholder') && 
+
+      const hasRealServiceKey = !config.supabase.serviceRoleKey.includes('placeholder') &&
                                !config.supabase.serviceRoleKey.includes('your-') &&
                                config.supabase.serviceRoleKey.length > 20;
-      
-      const hasRealAnonKey = !config.supabase.anonKey.includes('placeholder') && 
+
+      const hasRealAnonKey = !config.supabase.anonKey.includes('placeholder') &&
                             !config.supabase.anonKey.includes('your-') &&
                             config.supabase.anonKey.length > 20;
-      
+
       if (hasRealServiceKey && hasRealAnonKey) {
         console.log('PASSED - Real Supabase API keys configured');
         expect(config.supabase.serviceRoleKey).toMatch(/^eyJ/); // JWT format
@@ -130,8 +125,8 @@ describe('Supabase Configuration Tests', () => {
       } else {
         console.log('INFO - Placeholder Supabase keys detected (expected in test environment)');
       }
-      
-             console.log('PASSED - Supabase bucket:', config.supabase.bucket);
+
+      console.log('PASSED - Supabase bucket:', config.supabase.bucket);
     });
   });
 
@@ -142,12 +137,12 @@ describe('Supabase Configuration Tests', () => {
         VALUES ($1, crypt($2, gen_salt('bf')), $3, $4)
         RETURNING id, email, first_name, last_name, created_at;
       `;
-      
+
       expect(registrationQuery).toContain('crypt');
       expect(registrationQuery).toContain('gen_salt');
       expect(registrationQuery).toContain('RETURNING');
-      
-             console.log('PASSED - User registration query template validated');
+
+      console.log('PASSED - User registration query template validated');
     });
 
     test('should validate user authentication query template', () => {
@@ -158,12 +153,12 @@ describe('Supabase Configuration Tests', () => {
         FROM users 
         WHERE email = $1;
       `;
-      
+
       expect(authQuery).toContain('crypt');
       expect(authQuery).toContain('password_hash');
       expect(authQuery).toContain('password_valid');
-      
-             console.log('PASSED - User authentication query template validated');
+
+      console.log('PASSED - User authentication query template validated');
     });
 
     test('should validate fuzzy search query template', () => {
@@ -175,12 +170,12 @@ describe('Supabase Configuration Tests', () => {
         WHERE first_name % $1
         ORDER BY name_similarity DESC;
       `;
-      
+
       expect(searchQuery).toContain('similarity');
       expect(searchQuery).toContain('%'); // trigram operator
       expect(searchQuery).toContain('ORDER BY');
-      
-             console.log('PASSED - Fuzzy search query template validated');
+
+      console.log('PASSED - Fuzzy search query template validated');
     });
 
     test('should validate session management query templates', () => {
@@ -198,70 +193,70 @@ describe('Supabase Configuration Tests', () => {
           AND crypt($2, s.token_hash) = s.token_hash
           AND s.expires_at > NOW();
       `;
-      
+
       expect(createSessionQuery).toContain('INTERVAL');
       expect(createSessionQuery).toContain('NOW()');
       expect(validateSessionQuery).toContain('JOIN');
       expect(validateSessionQuery).toContain('expires_at > NOW()');
-      
-             console.log('PASSED - Session management query templates validated');
+
+      console.log('PASSED - Session management query templates validated');
     });
   });
 
   describe('Extension Feature Validation', () => {
     test('should validate pgcrypto usage patterns', () => {
       const cryptoExamples = {
-        hashPassword: "crypt('password', gen_salt('bf'))",
-        verifyPassword: "crypt('input', stored_hash) = stored_hash",
-        generateSalt: "gen_salt('bf')"
+        hashPassword: 'crypt(\'password\', gen_salt(\'bf\'))',
+        verifyPassword: 'crypt(\'input\', stored_hash) = stored_hash',
+        generateSalt: 'gen_salt(\'bf\')',
       };
-      
+
       expect(cryptoExamples.hashPassword).toContain('crypt');
       expect(cryptoExamples.hashPassword).toContain('gen_salt');
       expect(cryptoExamples.verifyPassword).toContain('=');
-      
-             console.log('PASSED - pgcrypto usage patterns validated');
+
+      console.log('PASSED - pgcrypto usage patterns validated');
     });
 
     test('should validate pg_trgm usage patterns', () => {
       const trigramExamples = {
-        similarity: "similarity('text1', 'text2')",
-        similarityOperator: "text1 % text2",
-        trigramIndex: "CREATE INDEX idx_name ON table USING gin(column gin_trgm_ops)"
+        similarity: 'similarity(\'text1\', \'text2\')',
+        similarityOperator: 'text1 % text2',
+        trigramIndex: 'CREATE INDEX idx_name ON table USING gin(column gin_trgm_ops)',
       };
-      
+
       expect(trigramExamples.similarity).toContain('similarity');
       expect(trigramExamples.similarityOperator).toContain('%');
       expect(trigramExamples.trigramIndex).toContain('gin_trgm_ops');
-      
-             console.log('PASSED - pg_trgm usage patterns validated');
+
+      console.log('PASSED - pg_trgm usage patterns validated');
     });
 
     test('should validate UUID generation patterns', () => {
       const uuidExamples = {
-        v4: "uuid_generate_v4()",
-        v1: "uuid_generate_v1()",
-        defaultValue: "DEFAULT uuid_generate_v4()"
+        v4: 'uuid_generate_v4()',
+        v1: 'uuid_generate_v1()',
+        defaultValue: 'DEFAULT uuid_generate_v4()',
       };
-      
+
       expect(uuidExamples.v4).toContain('uuid_generate_v4');
       expect(uuidExamples.v1).toContain('uuid_generate_v1');
       expect(uuidExamples.defaultValue).toContain('DEFAULT');
-      
-             console.log('PASSED - UUID generation patterns validated');
+
+      console.log('PASSED - UUID generation patterns validated');
     });
 
     test('should validate btree_gin index patterns', () => {
       const ginExamples = {
-        textSearch: "CREATE INDEX idx_search ON table USING gin(to_tsvector('english', content))",
-        multiColumn: "CREATE INDEX idx_multi ON table USING gin(col1, col2)"
+        textSearch: 'CREATE INDEX idx_search ON table USING gin(to_tsvector(\'english\', content))',
+        multiColumn: 'CREATE INDEX idx_multi ON table USING gin(col1, col2)',
       };
-      
+
       expect(ginExamples.textSearch).toContain('USING gin');
       expect(ginExamples.textSearch).toContain('to_tsvector');
       expect(ginExamples.multiColumn).toContain('gin(col1, col2)');
-      
-             console.log('PASSED - btree_gin index patterns validated');
+
+      console.log('PASSED - btree_gin index patterns validated');
     });
   });
 });
@@ -277,17 +272,17 @@ describe('Mock Supabase Connection Test', () => {
       extensions: ['pgcrypto', 'pg_trgm', 'pg_stat_statements', 'btree_gin', 'uuid-ossp'],
       timeouts: {
         statement_timeout: '10s',
-        idle_in_transaction_session_timeout: '10s'
+        idle_in_transaction_session_timeout: '10s',
       },
-      environment: config.nodeEnv
+      environment: config.nodeEnv,
     };
-    
+
     expect(mockConnectionResult.connected).toBe(true);
     expect(mockConnectionResult.extensions).toHaveLength(5);
     expect(mockConnectionResult.timeouts.statement_timeout).toBe('10s');
     expect(mockConnectionResult.timeouts.idle_in_transaction_session_timeout).toBe('10s');
-    
-         console.log('PASSED - Mock Supabase connection successful:', mockConnectionResult);
+
+    console.log('PASSED - Mock Supabase connection successful:', mockConnectionResult);
   });
 
   test('should simulate user story execution', async () => {
@@ -297,16 +292,16 @@ describe('Mock Supabase Connection Test', () => {
       userAuthentication: { success: true, valid: true },
       sessionManagement: { success: true, sessionId: 'mock-session-456' },
       fuzzySearch: { success: true, results: 3 },
-      fullTextSearch: { success: true, results: 5 }
+      fullTextSearch: { success: true, results: 5 },
     };
-    
+
     expect(userStoryResults.userRegistration.success).toBe(true);
     expect(userStoryResults.userAuthentication.valid).toBe(true);
     expect(userStoryResults.sessionManagement.success).toBe(true);
     expect(userStoryResults.fuzzySearch.results).toBeGreaterThan(0);
     expect(userStoryResults.fullTextSearch.results).toBeGreaterThan(0);
-    
-         console.log('PASSED - All user stories validated:', userStoryResults);
+
+    console.log('PASSED - All user stories validated:', userStoryResults);
   });
 });
 

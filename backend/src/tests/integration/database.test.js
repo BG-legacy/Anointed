@@ -1,4 +1,4 @@
-import { describe, beforeAll, afterAll, beforeEach, afterEach, test, expect } from '@jest/globals';
+import { describe, beforeAll, afterAll, test, expect } from '@jest/globals';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import { RedisContainer } from '@testcontainers/redis';
 import { database } from '../../services/database.js';
@@ -25,7 +25,7 @@ describe('Database Integration Tests', () => {
     // Update environment variables
     originalDatabaseUrl = process.env.DATABASE_URL;
     originalRedisUrl = process.env.REDIS_URL;
-    
+
     process.env.DATABASE_URL = postgresContainer.getConnectionUri();
     process.env.REDIS_URL = `redis://${redisContainer.getHost()}:${redisContainer.getMappedPort(6379)}`;
 
@@ -76,7 +76,7 @@ describe('Database Integration Tests', () => {
       // Insert test data
       const insertResult = await database.query(
         'INSERT INTO test_users (name, email) VALUES ($1, $2) RETURNING id',
-        ['Test User', 'test@example.com']
+        ['Test User', 'test@example.com'],
       );
 
       expect(insertResult.rows[0].id).toBeDefined();
@@ -84,7 +84,7 @@ describe('Database Integration Tests', () => {
       // Query test data
       const selectResult = await database.query(
         'SELECT * FROM test_users WHERE email = $1',
-        ['test@example.com']
+        ['test@example.com'],
       );
 
       expect(selectResult.rows[0].name).toBe('Test User');
@@ -115,14 +115,14 @@ describe('Database Integration Tests', () => {
       const testValue = { message: 'This will expire' };
 
       await redis.set(testKey, testValue, 1); // 1 second TTL
-      
+
       // Should exist immediately
       let exists = await redis.exists(testKey);
       expect(exists).toBe(1);
 
       // Wait for expiration
       await new Promise(resolve => setTimeout(resolve, 1100));
-      
+
       exists = await redis.exists(testKey);
       expect(exists).toBe(0);
     });
@@ -132,12 +132,12 @@ describe('Database Integration Tests', () => {
       const testValue = { message: 'To be deleted' };
 
       await redis.set(testKey, testValue);
-      
+
       let exists = await redis.exists(testKey);
       expect(exists).toBe(1);
 
       await redis.del(testKey);
-      
+
       exists = await redis.exists(testKey);
       expect(exists).toBe(0);
     });
@@ -162,13 +162,13 @@ describe('Database Integration Tests', () => {
       // Insert test data
       await database.query(
         'INSERT INTO cached_data (name) VALUES ($1)',
-        ['Cached User']
+        ['Cached User'],
       );
 
       // Query database
       const dbResult = await database.query(
         'SELECT * FROM cached_data WHERE name = $1',
-        ['Cached User']
+        ['Cached User'],
       );
 
       // Cache the result

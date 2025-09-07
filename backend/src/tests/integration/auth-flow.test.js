@@ -1,16 +1,16 @@
 /**
  * Authentication Flow Integration Tests
- * 
+ *
  * Tests realistic authentication flows using all auth auxiliary models together.
  */
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import prismaService from '../../services/prisma.js';
-import { 
-  UserRepository, 
-  RefreshTokenRepository, 
-  PasswordResetRepository, 
-  MagicLinkRepository 
+import {
+  UserRepository,
+  RefreshTokenRepository,
+  PasswordResetRepository,
+  MagicLinkRepository,
 } from '../../repositories/index.js';
 
 describe('Authentication Flow Integration', () => {
@@ -50,7 +50,7 @@ describe('Authentication Flow Integration', () => {
         } else if (item.type === 'magicLink') {
           await magicLinkRepo.delete(item.id);
         }
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     }
@@ -58,7 +58,7 @@ describe('Authentication Flow Integration', () => {
     if (testUser) {
       try {
         await userRepo.hardDelete(testUser.id);
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     }
@@ -85,8 +85,8 @@ describe('Authentication Flow Integration', () => {
 
       // Step 2: User clicks verification link
       const validLink = await magicLinkRepo.findValidTokenByPurpose(
-        verificationLink.tokenHash, 
-        'email_verification'
+        verificationLink.tokenHash,
+        'email_verification',
       );
       expect(validLink).toBeTruthy();
 
@@ -163,8 +163,8 @@ describe('Authentication Flow Integration', () => {
 
       // Step 2: User clicks magic link - validate and use
       const validMagicLink = await magicLinkRepo.findValidTokenByPurpose(
-        magicLink.tokenHash, 
-        'login'
+        magicLink.tokenHash,
+        'login',
       );
       expect(validMagicLink).toBeTruthy();
 
@@ -235,7 +235,7 @@ describe('Authentication Flow Integration', () => {
       createdItems.push(
         { type: 'refreshToken', id: refreshToken.id },
         { type: 'passwordReset', id: passwordReset.id },
-        { type: 'magicLink', id: magicLink.id }
+        { type: 'magicLink', id: magicLink.id },
       );
 
       // Verify tokens are valid
@@ -371,13 +371,13 @@ describe('Authentication Flow Integration', () => {
       ];
 
       const results = await Promise.all(concurrentOperations);
-      
+
       // Add to cleanup
       createdItems.push(
         { type: 'refreshToken', id: results[0].id },
         { type: 'refreshToken', id: results[1].id },
         { type: 'passwordReset', id: results[2].id },
-        { type: 'magicLink', id: results[3].id }
+        { type: 'magicLink', id: results[3].id },
       );
 
       // Verify all operations succeeded

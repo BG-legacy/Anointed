@@ -1,6 +1,6 @@
 /**
  * Refresh Token Repository
- * 
+ *
  * Handles all database operations for RefreshToken model.
  * Used for managing JWT refresh tokens with proper expiration and revocation.
  */
@@ -35,7 +35,7 @@ class RefreshTokenRepository {
           },
         },
       });
-      
+
       logger.info(`Refresh token created for user: ${tokenData.userId}`);
       return token;
     } catch (error) {
@@ -170,7 +170,7 @@ class RefreshTokenRepository {
           },
         },
       });
-      
+
       logger.info(`Refresh token revoked: ${id}`);
       return token;
     } catch (error) {
@@ -193,7 +193,7 @@ class RefreshTokenRepository {
         },
         data: { revokedAt: new Date() },
       });
-      
+
       logger.info(`All refresh tokens revoked for user: ${userId}, count: ${result.count}`);
       return result;
     } catch (error) {
@@ -242,7 +242,7 @@ class RefreshTokenRepository {
           expiresAt: { lt: new Date() },
         },
       });
-      
+
       logger.info(`Expired refresh tokens deleted, count: ${result.count}`);
       return result;
     } catch (error) {
@@ -261,7 +261,7 @@ class RefreshTokenRepository {
       const token = await this.prisma.refreshToken.delete({
         where: { id },
       });
-      
+
       logger.info(`Refresh token deleted: ${id}`);
       return token;
     } catch (error) {
@@ -279,12 +279,12 @@ class RefreshTokenRepository {
   async countForUser(userId, onlyValid = false) {
     try {
       const where = { userId };
-      
+
       if (onlyValid) {
         where.revokedAt = null;
         where.expiresAt = { gt: new Date() };
       }
-      
+
       return await this.prisma.refreshToken.count({ where });
     } catch (error) {
       logger.error('Error counting tokens for user:', error);

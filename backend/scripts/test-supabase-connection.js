@@ -2,7 +2,7 @@
 
 /**
  * Supabase Connection Test Script
- * 
+ *
  * This script tests the actual connection to your Supabase database
  * and validates that all extensions and configurations are working.
  */
@@ -188,7 +188,7 @@ async function testSupabaseConnection() {
   } catch (error) {
     console.error('\nFAILED - Supabase connection test failed:');
     console.error(error.message);
-    
+
     if (error.code === 'ENOTFOUND') {
       console.error('\nTROUBLESHOOT - Network Issues:');
       console.error('  HELP - Check your SUPABASE_DB_URL_* environment variables');
@@ -203,7 +203,7 @@ async function testSupabaseConnection() {
       console.error('  HELP - The specified database does not exist');
       console.error('  HELP - Check your database name in the connection string');
     }
-    
+
     process.exit(1);
   } finally {
     if (pool) {

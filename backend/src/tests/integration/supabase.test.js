@@ -1,14 +1,12 @@
 import { describe, beforeAll, afterAll, test, expect } from '@jest/globals';
 import { PostgreSqlContainer } from '@testcontainers/postgresql';
 import pg from 'pg';
-import { config } from '../../config/index.js';
-import { database } from '../../services/database.js';
 
 const { Pool } = pg;
 
 /**
  * Comprehensive Supabase Database Integration Tests
- * 
+ *
  * This test suite validates:
  * 1. All required Postgres extensions are installed and working
  * 2. Database timeout parameters are properly configured
@@ -18,7 +16,6 @@ const { Pool } = pg;
 describe('Supabase Database Integration Tests', () => {
   let postgresContainer;
   let testPool;
-  let testDatabase;
 
   beforeAll(async () => {
     try {
@@ -60,7 +57,7 @@ describe('Supabase Database Integration Tests', () => {
   describe('Database Extensions Validation', () => {
     test('should have all required Supabase extensions installed', async () => {
       const requiredExtensions = ['pgcrypto', 'pg_trgm', 'pg_stat_statements', 'btree_gin', 'uuid-ossp'];
-      
+
       const result = await testPool.query(`
         SELECT extname, extversion
         FROM pg_extension 
@@ -69,13 +66,13 @@ describe('Supabase Database Integration Tests', () => {
       `, [requiredExtensions]);
 
       expect(result.rows).toHaveLength(requiredExtensions.length);
-      
+
       const installedExtensions = result.rows.map(row => row.extname);
       for (const ext of requiredExtensions) {
         expect(installedExtensions).toContain(ext);
       }
 
-             console.log('PASSED - Installed extensions:', result.rows);
+      console.log('PASSED - Installed extensions:', result.rows);
     });
 
     test('should validate pgcrypto functions work correctly', async () => {
@@ -134,10 +131,10 @@ describe('Supabase Database Integration Tests', () => {
 
       // Check that timeout settings are available (they might be default values in test)
       expect(result.rows.length).toBeGreaterThanOrEqual(1);
-      
+
       for (const setting of result.rows) {
         expect(setting.name).toMatch(/timeout/);
-                 console.log(`PASSED - ${setting.name}: ${setting.setting}${setting.unit || ''}`);
+        console.log(`PASSED - ${setting.name}: ${setting.setting}${setting.unit || ''}`);
       }
     });
 
@@ -145,7 +142,7 @@ describe('Supabase Database Integration Tests', () => {
       // Execute a few queries to generate stats
       await testPool.query('SELECT 1 as test_query');
       await testPool.query('SELECT COUNT(*) FROM users WHERE email LIKE \'%test%\'');
-      
+
       // Check if pg_stat_statements is tracking
       const result = await testPool.query(`
         SELECT calls, query 
@@ -165,7 +162,7 @@ describe('Supabase Database Integration Tests', () => {
         email: 'john.doe@anointed.com',
         password: 'SecurePassword123!',
         firstName: 'John',
-        lastName: 'Doe'
+        lastName: 'Doe',
       };
 
       // Register user (simulate registration endpoint)
@@ -177,14 +174,14 @@ describe('Supabase Database Integration Tests', () => {
 
       expect(insertResult.rows).toHaveLength(1);
       const user = insertResult.rows[0];
-      
+
       expect(user.email).toBe(userData.email);
       expect(user.first_name).toBe(userData.firstName);
       expect(user.last_name).toBe(userData.lastName);
       expect(user.id).toBeTruthy();
       expect(user.created_at).toBeInstanceOf(Date);
 
-             console.log('PASSED - User registered:', { id: user.id, email: user.email });
+      console.log('PASSED - User registered:', { id: user.id, email: user.email });
     });
 
     test('User Story: Should authenticate user with correct password', async () => {
@@ -205,11 +202,11 @@ describe('Supabase Database Integration Tests', () => {
 
       expect(authResult.rows).toHaveLength(1);
       const user = authResult.rows[0];
-      
+
       expect(user.password_valid).toBe(true);
       expect(user.email).toBe(email);
 
-             console.log('PASSED - User authenticated:', { id: user.id, email: user.email });
+      console.log('PASSED - User authenticated:', { id: user.id, email: user.email });
     });
 
     test('User Story: Should reject authentication with wrong password', async () => {
@@ -228,7 +225,7 @@ describe('Supabase Database Integration Tests', () => {
       expect(authResult.rows).toHaveLength(1);
       expect(authResult.rows[0].password_valid).toBe(false);
 
-             console.log('PASSED - Wrong password rejected correctly');
+      console.log('PASSED - Wrong password rejected correctly');
     });
 
     test('User Story: Should create and manage user sessions', async () => {
@@ -249,7 +246,7 @@ describe('Supabase Database Integration Tests', () => {
 
       expect(sessionResult.rows).toHaveLength(1);
       const session = sessionResult.rows[0];
-      
+
       expect(session.user_id).toBe(userId);
       expect(session.expires_at > new Date()).toBe(true);
 
@@ -266,9 +263,9 @@ describe('Supabase Database Integration Tests', () => {
       expect(validateResult.rows).toHaveLength(1);
       expect(validateResult.rows[0].email).toBe('john.doe@anointed.com');
 
-             console.log('PASSED - Session created and validated:', { 
-        sessionId: session.id, 
-        userId: session.user_id 
+      console.log('PASSED - Session created and validated:', {
+        sessionId: session.id,
+        userId: session.user_id,
       });
     });
   });
@@ -281,7 +278,7 @@ describe('Supabase Database Integration Tests', () => {
         ['bob.builder@anointed.com', 'Bob', 'Builder'],
         ['carol.singer@anointed.com', 'Carol', 'Singer'],
         ['david.dancer@anointed.com', 'David', 'Dancer'],
-        ['eve.explorer@anointed.com', 'Eve', 'Explorer']
+        ['eve.explorer@anointed.com', 'Eve', 'Explorer'],
       ];
 
       for (const [email, firstName, lastName] of testUsers) {
@@ -311,7 +308,7 @@ describe('Supabase Database Integration Tests', () => {
       expect(searchResult.rows[0].first_name).toBe('Alice');
       expect(searchResult.rows[0].name_similarity).toBeGreaterThan(0.1);
 
-             console.log('PASSED - Fuzzy search found:', searchResult.rows[0]);
+      console.log('PASSED - Fuzzy search found:', searchResult.rows[0]);
     });
 
     test('User Story: Should search users by email domain', async () => {
@@ -323,12 +320,12 @@ describe('Supabase Database Integration Tests', () => {
       `);
 
       expect(domainSearchResult.rows.length).toBeGreaterThanOrEqual(5);
-      
+
       for (const user of domainSearchResult.rows) {
         expect(user.email).toContain('anointed.com');
       }
 
-             console.log('PASSED - Domain search found', domainSearchResult.rows.length, 'users');
+      console.log('PASSED - Domain search found', domainSearchResult.rows.length, 'users');
     });
 
     test('User Story: Should perform full-text search across user fields', async () => {
@@ -366,40 +363,40 @@ describe('Supabase Database Integration Tests', () => {
       expect(searchResult.rows.length).toBeGreaterThan(0);
       expect(searchResult.rows[0].last_name.toLowerCase()).toContain('builder');
 
-             console.log('PASSED - Full-text search found:', searchResult.rows[0]);
+      console.log('PASSED - Full-text search found:', searchResult.rows[0]);
     });
   });
 
   describe('Database Constraints and Data Integrity', () => {
     test('Should enforce unique email constraint', async () => {
       const duplicateEmail = 'john.doe@anointed.com';
-      
+
       await expect(
         testPool.query(`
           INSERT INTO users (email, password_hash, first_name, last_name)
           VALUES ($1, crypt('password', gen_salt('bf')), 'John', 'Duplicate');
-        `, [duplicateEmail])
+        `, [duplicateEmail]),
       ).rejects.toThrow();
 
-             console.log('PASSED - Unique email constraint enforced');
+      console.log('PASSED - Unique email constraint enforced');
     });
 
     test('Should maintain referential integrity for sessions', async () => {
       const nonExistentUserId = '00000000-0000-0000-0000-000000000000';
-      
+
       await expect(
         testPool.query(`
           INSERT INTO sessions (user_id, token_hash, expires_at)
           VALUES ($1, crypt('token', gen_salt('bf')), NOW() + INTERVAL '1 hour');
-        `, [nonExistentUserId])
+        `, [nonExistentUserId]),
       ).rejects.toThrow();
 
-             console.log('PASSED - Foreign key constraint enforced');
+      console.log('PASSED - Foreign key constraint enforced');
     });
 
     test('Should automatically set timestamps', async () => {
       const beforeInsert = new Date();
-      
+
       const result = await testPool.query(`
         INSERT INTO users (email, password_hash, first_name, last_name)
         VALUES ($1, crypt('password', gen_salt('bf')), 'Time', 'Test')
@@ -414,9 +411,9 @@ describe('Supabase Database Integration Tests', () => {
       expect(user.created_at.getTime()).toBeGreaterThanOrEqual(beforeInsert.getTime());
       expect(user.created_at.getTime()).toBeLessThanOrEqual(afterInsert.getTime());
 
-             console.log('PASSED - Automatic timestamps working:', {
+      console.log('PASSED - Automatic timestamps working:', {
         created_at: user.created_at,
-        updated_at: user.updated_at
+        updated_at: user.updated_at,
       });
     });
   });
@@ -432,7 +429,7 @@ async function setupTestDatabase(pool) {
     'CREATE EXTENSION IF NOT EXISTS "pgcrypto";',
     'CREATE EXTENSION IF NOT EXISTS "pg_trgm";',
     'CREATE EXTENSION IF NOT EXISTS "pg_stat_statements";',
-    'CREATE EXTENSION IF NOT EXISTS "btree_gin";'
+    'CREATE EXTENSION IF NOT EXISTS "btree_gin";',
   ];
 
   for (const extension of extensions) {
@@ -468,12 +465,12 @@ async function setupTestDatabase(pool) {
     'CREATE INDEX IF NOT EXISTS idx_users_name_trgm ON users USING gin(first_name gin_trgm_ops, last_name gin_trgm_ops);',
     'CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id);',
     'CREATE INDEX IF NOT EXISTS idx_sessions_token_hash ON sessions(token_hash);',
-    'CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);'
+    'CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at);',
   ];
 
   for (const index of indexes) {
     await pool.query(index);
   }
 
-     console.log('PASSED - Test database setup complete with all extensions and schema');
+  console.log('PASSED - Test database setup complete with all extensions and schema');
 }

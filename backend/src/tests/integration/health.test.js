@@ -27,7 +27,7 @@ describe('Health Routes Integration Tests', () => {
     // Update environment variables
     originalDatabaseUrl = process.env.DATABASE_URL;
     originalRedisUrl = process.env.REDIS_URL;
-    
+
     process.env.DATABASE_URL = postgresContainer.getConnectionUri();
     process.env.REDIS_URL = `redis://${redisContainer.getHost()}:${redisContainer.getMappedPort(6379)}`;
 

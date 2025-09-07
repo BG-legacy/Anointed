@@ -1,6 +1,6 @@
 /**
  * User Settings Repository
- * 
+ *
  * Handles all database operations for UserSettings model.
  */
 
@@ -31,7 +31,7 @@ class UserSettingsRepository {
           },
         },
       });
-      
+
       logger.info(`User settings created for user: ${settingsData.userId}`);
       return settings;
     } catch (error) {
@@ -86,7 +86,7 @@ class UserSettingsRepository {
           },
         },
       });
-      
+
       logger.info(`User settings updated for user: ${userId}`);
       return settings;
     } catch (error) {
@@ -120,7 +120,7 @@ class UserSettingsRepository {
           },
         },
       });
-      
+
       logger.info(`User settings upserted for user: ${userId}`);
       return settings;
     } catch (error) {
@@ -139,7 +139,7 @@ class UserSettingsRepository {
       const settings = await this.prisma.userSettings.delete({
         where: { userId },
       });
-      
+
       logger.info(`User settings deleted for user: ${userId}`);
       return settings;
     } catch (error) {

@@ -1,6 +1,6 @@
 /**
  * Password Reset Repository
- * 
+ *
  * Handles all database operations for PasswordReset model.
  * Used for managing password reset tokens with proper expiration and usage tracking.
  */
@@ -35,7 +35,7 @@ class PasswordResetRepository {
           },
         },
       });
-      
+
       logger.info(`Password reset token created for user: ${resetData.userId}`);
       return resetToken;
     } catch (error) {
@@ -132,12 +132,12 @@ class PasswordResetRepository {
   async findByUserId(userId, onlyValid = false) {
     try {
       const where = { userId };
-      
+
       if (onlyValid) {
         where.usedAt = null;
         where.expiresAt = { gt: new Date() };
       }
-      
+
       return await this.prisma.passwordReset.findMany({
         where,
         include: {
@@ -177,7 +177,7 @@ class PasswordResetRepository {
           },
         },
       });
-      
+
       logger.info(`Password reset token marked as used: ${id}`);
       return token;
     } catch (error) {
@@ -194,13 +194,13 @@ class PasswordResetRepository {
   async markAsUsedByHash(tokenHash) {
     try {
       const token = await this.prisma.passwordReset.updateMany({
-        where: { 
+        where: {
           tokenHash,
           usedAt: null,
         },
         data: { usedAt: new Date() },
       });
-      
+
       logger.info(`Password reset token marked as used by hash, count: ${token.count}`);
       return token;
     } catch (error) {
@@ -223,7 +223,7 @@ class PasswordResetRepository {
         },
         data: { usedAt: new Date() },
       });
-      
+
       logger.info(`All password reset tokens invalidated for user: ${userId}, count: ${result.count}`);
       return result;
     } catch (error) {
@@ -243,7 +243,7 @@ class PasswordResetRepository {
           expiresAt: { lt: new Date() },
         },
       });
-      
+
       logger.info(`Expired password reset tokens deleted, count: ${result.count}`);
       return result;
     } catch (error) {
@@ -263,7 +263,7 @@ class PasswordResetRepository {
           usedAt: { not: null },
         },
       });
-      
+
       logger.info(`Used password reset tokens deleted, count: ${result.count}`);
       return result;
     } catch (error) {
@@ -282,7 +282,7 @@ class PasswordResetRepository {
       const token = await this.prisma.passwordReset.delete({
         where: { id },
       });
-      
+
       logger.info(`Password reset token deleted: ${id}`);
       return token;
     } catch (error) {
@@ -300,12 +300,12 @@ class PasswordResetRepository {
   async countForUser(userId, onlyValid = false) {
     try {
       const where = { userId };
-      
+
       if (onlyValid) {
         where.usedAt = null;
         where.expiresAt = { gt: new Date() };
       }
-      
+
       return await this.prisma.passwordReset.count({ where });
     } catch (error) {
       logger.error('Error counting password reset tokens for user:', error);
@@ -323,7 +323,7 @@ class PasswordResetRepository {
     try {
       const cutoffTime = new Date();
       cutoffTime.setHours(cutoffTime.getHours() - hoursBack);
-      
+
       return await this.prisma.passwordReset.count({
         where: {
           userId,

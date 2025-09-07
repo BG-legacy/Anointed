@@ -1,16 +1,16 @@
 /**
  * Authentication Repositories Tests
- * 
+ *
  * Comprehensive tests for RefreshToken, PasswordReset, and MagicLink repositories.
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import prismaService from '../../services/prisma.js';
-import { 
-  UserRepository, 
-  RefreshTokenRepository, 
-  PasswordResetRepository, 
-  MagicLinkRepository 
+import {
+  UserRepository,
+  RefreshTokenRepository,
+  PasswordResetRepository,
+  MagicLinkRepository,
 } from '../../repositories/index.js';
 
 describe('Authentication Repositories', () => {
@@ -46,7 +46,7 @@ describe('Authentication Repositories', () => {
     for (const token of createdTokens) {
       try {
         await refreshTokenRepo.delete(token.id);
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     }
@@ -54,7 +54,7 @@ describe('Authentication Repositories', () => {
     for (const reset of createdResets) {
       try {
         await passwordResetRepo.delete(reset.id);
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     }
@@ -62,7 +62,7 @@ describe('Authentication Repositories', () => {
     for (const link of createdLinks) {
       try {
         await magicLinkRepo.delete(link.id);
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     }
@@ -70,7 +70,7 @@ describe('Authentication Repositories', () => {
     if (testUser) {
       try {
         await userRepo.hardDelete(testUser.id);
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     }
@@ -367,7 +367,7 @@ describe('Authentication Repositories', () => {
       const validLoginLinks = await magicLinkRepo.findByPurpose('login', true);
       expect(allLoginLinks.length).toBeGreaterThan(0);
       expect(validLoginLinks.length).toBeGreaterThan(0);
-      
+
       const ourLinkByPurpose = allLoginLinks.find(link => link.id === testLink.id);
       expect(ourLinkByPurpose).toBeTruthy();
 

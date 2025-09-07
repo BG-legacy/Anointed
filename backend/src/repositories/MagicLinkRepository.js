@@ -1,6 +1,6 @@
 /**
  * Magic Link Repository
- * 
+ *
  * Handles all database operations for MagicLink model.
  * Used for managing magic link tokens for various purposes like login, signup, email verification.
  */
@@ -36,7 +36,7 @@ class MagicLinkRepository {
           },
         },
       });
-      
+
       logger.info(`Magic link created for user: ${linkData.userId}, purpose: ${linkData.purpose}`);
       return magicLink;
     } catch (error) {
@@ -165,16 +165,16 @@ class MagicLinkRepository {
   async findByUserId(userId, onlyValid = false, purpose = null) {
     try {
       const where = { userId };
-      
+
       if (onlyValid) {
         where.usedAt = null;
         where.expiresAt = { gt: new Date() };
       }
-      
+
       if (purpose) {
         where.purpose = purpose;
       }
-      
+
       return await this.prisma.magicLink.findMany({
         where,
         include: {
@@ -203,12 +203,12 @@ class MagicLinkRepository {
   async findByPurpose(purpose, onlyValid = false) {
     try {
       const where = { purpose };
-      
+
       if (onlyValid) {
         where.usedAt = null;
         where.expiresAt = { gt: new Date() };
       }
-      
+
       return await this.prisma.magicLink.findMany({
         where,
         include: {
@@ -248,7 +248,7 @@ class MagicLinkRepository {
           },
         },
       });
-      
+
       logger.info(`Magic link marked as used: ${id}`);
       return link;
     } catch (error) {
@@ -265,13 +265,13 @@ class MagicLinkRepository {
   async markAsUsedByHash(tokenHash) {
     try {
       const result = await this.prisma.magicLink.updateMany({
-        where: { 
+        where: {
           tokenHash,
           usedAt: null,
         },
         data: { usedAt: new Date() },
       });
-      
+
       logger.info(`Magic link marked as used by hash, count: ${result.count}`);
       return result;
     } catch (error) {
@@ -296,7 +296,7 @@ class MagicLinkRepository {
         },
         data: { usedAt: new Date() },
       });
-      
+
       logger.info(`Magic links invalidated for user: ${userId}, purpose: ${purpose}, count: ${result.count}`);
       return result;
     } catch (error) {
@@ -319,7 +319,7 @@ class MagicLinkRepository {
         },
         data: { usedAt: new Date() },
       });
-      
+
       logger.info(`All magic links invalidated for user: ${userId}, count: ${result.count}`);
       return result;
     } catch (error) {
@@ -339,7 +339,7 @@ class MagicLinkRepository {
           expiresAt: { lt: new Date() },
         },
       });
-      
+
       logger.info(`Expired magic links deleted, count: ${result.count}`);
       return result;
     } catch (error) {
@@ -359,7 +359,7 @@ class MagicLinkRepository {
           usedAt: { not: null },
         },
       });
-      
+
       logger.info(`Used magic links deleted, count: ${result.count}`);
       return result;
     } catch (error) {
@@ -378,7 +378,7 @@ class MagicLinkRepository {
       const link = await this.prisma.magicLink.delete({
         where: { id },
       });
-      
+
       logger.info(`Magic link deleted: ${id}`);
       return link;
     } catch (error) {
@@ -397,16 +397,16 @@ class MagicLinkRepository {
   async countForUser(userId, onlyValid = false, purpose = null) {
     try {
       const where = { userId };
-      
+
       if (onlyValid) {
         where.usedAt = null;
         where.expiresAt = { gt: new Date() };
       }
-      
+
       if (purpose) {
         where.purpose = purpose;
       }
-      
+
       return await this.prisma.magicLink.count({ where });
     } catch (error) {
       logger.error('Error counting magic links for user:', error);
@@ -425,7 +425,7 @@ class MagicLinkRepository {
     try {
       const cutoffTime = new Date();
       cutoffTime.setHours(cutoffTime.getHours() - hoursBack);
-      
+
       return await this.prisma.magicLink.count({
         where: {
           userId,

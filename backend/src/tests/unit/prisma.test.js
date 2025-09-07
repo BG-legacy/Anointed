@@ -1,6 +1,6 @@
 /**
  * Prisma Service Tests
- * 
+ *
  * Tests for Prisma client integration and repository functionality.
  */
 
@@ -27,23 +27,23 @@ describe('Prisma Integration', () => {
     if (testDevice) {
       try {
         await deviceRepo.delete(testDevice.id);
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     }
-    
+
     if (testSettings) {
       try {
         await settingsRepo.delete(testSettings.userId);
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     }
-    
+
     if (testUser) {
       try {
         await userRepo.hardDelete(testUser.id);
-      } catch (error) {
+      } catch {
         // Ignore cleanup errors
       }
     }
@@ -75,7 +75,7 @@ describe('Prisma Integration', () => {
       };
 
       testUser = await userRepo.create(userData);
-      
+
       expect(testUser).toHaveProperty('id');
       expect(testUser.email).toBe(userData.email);
       expect(testUser.displayName).toBe(userData.displayName);
@@ -84,7 +84,7 @@ describe('Prisma Integration', () => {
 
     it('should find user by email', async () => {
       const foundUser = await userRepo.findByEmail('test@example.com');
-      
+
       expect(foundUser).toBeTruthy();
       expect(foundUser.id).toBe(testUser.id);
     });
@@ -110,7 +110,7 @@ describe('Prisma Integration', () => {
       };
 
       testSettings = await settingsRepo.create(settingsData);
-      
+
       expect(testSettings).toHaveProperty('userId');
       expect(testSettings.userId).toBe(testUser.id);
       expect(testSettings.bibleTranslation).toBe('NIV');
@@ -119,7 +119,7 @@ describe('Prisma Integration', () => {
 
     it('should find settings by user ID', async () => {
       const foundSettings = await settingsRepo.findByUserId(testUser.id);
-      
+
       expect(foundSettings).toBeTruthy();
       expect(foundSettings.userId).toBe(testUser.id);
       expect(foundSettings.bibleTranslation).toBe('NIV');
@@ -130,7 +130,7 @@ describe('Prisma Integration', () => {
         bibleTranslation: 'ESV',
         denomination: 'Methodist',
       });
-      
+
       expect(updatedSettings.bibleTranslation).toBe('ESV');
       expect(updatedSettings.denomination).toBe('Methodist');
     });
@@ -145,7 +145,7 @@ describe('Prisma Integration', () => {
       };
 
       testDevice = await deviceRepo.create(deviceData);
-      
+
       expect(testDevice).toHaveProperty('id');
       expect(testDevice.userId).toBe(testUser.id);
       expect(testDevice.platform).toBe('ios');
@@ -154,25 +154,25 @@ describe('Prisma Integration', () => {
 
     it('should find devices by user ID', async () => {
       const devices = await deviceRepo.findByUserId(testUser.id);
-      
+
       expect(devices).toHaveLength(1);
       expect(devices[0].id).toBe(testDevice.id);
     });
 
     it('should update last seen timestamp', async () => {
       const originalLastSeen = testDevice.lastSeenAt;
-      
+
       // Wait a bit to ensure timestamp difference
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       const updatedDevice = await deviceRepo.updateLastSeen(testDevice.id);
-      
+
       expect(updatedDevice.lastSeenAt).not.toBe(originalLastSeen);
     });
 
     it('should get push tokens for user', async () => {
       const pushTokens = await deviceRepo.getPushTokensForUser(testUser.id);
-      
+
       expect(pushTokens).toHaveLength(1);
       expect(pushTokens[0].token).toBe('test-push-token-123');
       expect(pushTokens[0].platform).toBe('ios');
@@ -182,7 +182,7 @@ describe('Prisma Integration', () => {
   describe('Soft Delete Functionality', () => {
     it('should soft delete a user', async () => {
       const softDeletedUser = await userRepo.softDelete(testUser.id);
-      
+
       expect(softDeletedUser.deletedAt).toBeTruthy();
       expect(softDeletedUser.deletedAt).toBeInstanceOf(Date);
     });
@@ -194,9 +194,9 @@ describe('Prisma Integration', () => {
 
     it('should restore soft deleted user', async () => {
       const restoredUser = await userRepo.restore(testUser.id);
-      
+
       expect(restoredUser.deletedAt).toBeNull();
-      
+
       // Should be able to find again
       const foundUser = await userRepo.findByEmail('test@example.com');
       expect(foundUser).toBeTruthy();
