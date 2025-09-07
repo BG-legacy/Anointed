@@ -6,10 +6,7 @@ export default {
     '!src/**/*.spec.js',
     '!src/tests/**',
   ],
-  testMatch: [
-    '**/__tests__/**/*.js',
-    '**/?(*.)+(spec|test).js',
-  ],
+  testMatch: ['**/__tests__/**/*.js', '**/?(*.)+(spec|test).js'],
   testPathIgnorePatterns: ['/node_modules/'],
   setupFilesAfterEnv: ['<rootDir>/src/tests/setup.js'],
   coverageDirectory: 'coverage',

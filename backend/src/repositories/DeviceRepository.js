@@ -32,7 +32,9 @@ class DeviceRepository {
         },
       });
 
-      logger.info(`Device created for user: ${deviceData.userId}, platform: ${deviceData.platform}`);
+      logger.info(
+        `Device created for user: ${deviceData.userId}, platform: ${deviceData.platform}`
+      );
       return device;
     } catch (error) {
       logger.error('Error creating device:', error);
@@ -202,7 +204,9 @@ class DeviceRepository {
         },
       });
 
-      logger.info(`Device upserted for user: ${userId}, platform: ${deviceData.platform}`);
+      logger.info(
+        `Device upserted for user: ${userId}, platform: ${deviceData.platform}`
+      );
       return device;
     } catch (error) {
       logger.error('Error upserting device:', error);
@@ -319,7 +323,7 @@ class DeviceRepository {
         select: { pushToken: true, platform: true },
       });
 
-      return devices.map(device => ({
+      return devices.map((device) => ({
         token: device.pushToken,
         platform: device.platform,
       }));
@@ -331,4 +335,3 @@ class DeviceRepository {
 }
 
 export default DeviceRepository;
-

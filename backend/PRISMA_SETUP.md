@@ -7,6 +7,7 @@ This project uses **Prisma ORM** for database management with PostgreSQL. The sc
 ## 📋 Models
 
 ### User Model
+
 - **Primary Key**: UUID
 - **Features**: Soft deletes, timestamps
 - **Fields**:
@@ -21,6 +22,7 @@ This project uses **Prisma ORM** for database management with PostgreSQL. The sc
   - `deletedAt` (DateTime, optional) - Soft delete
 
 ### UserSettings Model
+
 - **Primary Key**: `userId` (references User)
 - **Features**: One-to-one with User, cascade delete
 - **Fields**:
@@ -34,6 +36,7 @@ This project uses **Prisma ORM** for database management with PostgreSQL. The sc
   - `updatedAt` (DateTime)
 
 ### Device Model
+
 - **Primary Key**: UUID
 - **Features**: Push notification management, unique constraint
 - **Fields**:
@@ -51,17 +54,20 @@ This project uses **Prisma ORM** for database management with PostgreSQL. The sc
 ### Initial Setup
 
 1. **Install Dependencies**:
+
    ```bash
    npm install prisma @prisma/client
    ```
 
 2. **Environment Configuration**:
+
    ```bash
    # Copy .env.example to .env and configure DATABASE_URL
    DATABASE_URL=postgresql://postgres:postgres@localhost:5433/anointed
    ```
 
 3. **Generate Prisma Client**:
+
    ```bash
    npm run db:generate
    ```
@@ -103,7 +109,7 @@ const userRepo = new UserRepository();
 const user = await userRepo.create({
   email: 'user@example.com',
   passwordHash: 'hashedPassword',
-  displayName: 'John Doe'
+  displayName: 'John Doe',
 });
 
 // Find user (excludes soft deleted)
@@ -129,7 +135,7 @@ const settings = await settingsRepo.upsert(userId, {
   denomination: 'Baptist',
   quietTimeStart: '06:00',
   quietTimeEnd: '07:00',
-  pushOptIn: true
+  pushOptIn: true,
 });
 ```
 
@@ -142,7 +148,7 @@ const deviceRepo = new DeviceRepository();
 
 // Register device
 const device = await deviceRepo.upsert(userId, pushToken, {
-  platform: 'ios'
+  platform: 'ios',
 });
 
 // Get push tokens for user
@@ -181,7 +187,7 @@ The generated SQL creates the following tables:
 ✅ **Soft Deletes**: Users can be soft deleted with `deletedAt` field  
 ✅ **Cascade Deletes**: Settings and devices are cleaned up when user is deleted  
 ✅ **Unique Constraints**: Prevent duplicate device registrations  
-✅ **Foreign Key Relationships**: Proper referential integrity  
+✅ **Foreign Key Relationships**: Proper referential integrity
 
 ## 🧪 Testing
 
@@ -192,6 +198,7 @@ npm run test:unit -- --testNamePattern="Prisma"
 ```
 
 The test suite covers:
+
 - Database connectivity
 - CRUD operations for all models
 - Soft delete functionality
@@ -212,4 +219,3 @@ The test suite covers:
 - Efficient repository patterns
 - Connection pooling via Prisma
 - Prepared statements for security and performance
-

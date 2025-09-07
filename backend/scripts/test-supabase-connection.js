@@ -18,7 +18,8 @@ async function testSupabaseConnection() {
   let pool;
   try {
     // Create connection to Supabase
-    const dbUrl = config.supabase.databaseUrl[config.nodeEnv] || config.database.url;
+    const dbUrl =
+      config.supabase.databaseUrl[config.nodeEnv] || config.database.url;
     console.log('INFO - Connecting to:', dbUrl.replace(/:[^:@]*@/, ':***@')); // Hide password in logs
 
     pool = new Pool({
@@ -43,12 +44,20 @@ async function testSupabaseConnection() {
       ORDER BY extname;
     `);
 
-    const requiredExtensions = ['pgcrypto', 'pg_trgm', 'pg_stat_statements', 'btree_gin', 'uuid-ossp'];
-    const installedExtensions = extensionsResult.rows.map(row => row.extname);
+    const requiredExtensions = [
+      'pgcrypto',
+      'pg_trgm',
+      'pg_stat_statements',
+      'btree_gin',
+      'uuid-ossp',
+    ];
+    const installedExtensions = extensionsResult.rows.map((row) => row.extname);
 
     for (const ext of requiredExtensions) {
       if (installedExtensions.includes(ext)) {
-        const version = extensionsResult.rows.find(row => row.extname === ext)?.extversion;
+        const version = extensionsResult.rows.find(
+          (row) => row.extname === ext
+        )?.extversion;
         console.log(`  PASSED - ${ext} (v${version})`);
       } else {
         console.log(`  FAILED - ${ext} - NOT INSTALLED`);
@@ -65,7 +74,9 @@ async function testSupabaseConnection() {
     `);
 
     for (const param of paramsResult.rows) {
-      console.log(`  PASSED - ${param.name}: ${param.setting}${param.unit || ''} (${param.context})`);
+      console.log(
+        `  PASSED - ${param.name}: ${param.setting}${param.unit || ''} (${param.context})`
+      );
     }
 
     // Test 3: Test pgcrypto
@@ -78,14 +89,21 @@ async function testSupabaseConnection() {
 
     const { salt, hashed_password } = cryptoResult.rows[0];
     console.log(`  PASSED - Salt generated: ${salt}`);
-    console.log(`  PASSED - Password hashed: ${hashed_password.substring(0, 20)}...`);
+    console.log(
+      `  PASSED - Password hashed: ${hashed_password.substring(0, 20)}...`
+    );
 
     // Verify password
-    const verifyResult = await client.query(`
+    const verifyResult = await client.query(
+      `
       SELECT crypt('testpassword123', $1) = $1 as password_matches;
-    `, [hashed_password]);
+    `,
+      [hashed_password]
+    );
 
-    console.log(`  PASSED - Password verification: ${verifyResult.rows[0].password_matches ? 'PASS' : 'FAIL'}`);
+    console.log(
+      `  PASSED - Password verification: ${verifyResult.rows[0].password_matches ? 'PASS' : 'FAIL'}`
+    );
 
     // Test 4: Test pg_trgm (Trigram Search)
     console.log('\nTEST - pg_trgm (Fuzzy Search)...');
@@ -129,7 +147,7 @@ async function testSupabaseConnection() {
         }
 
         // Test user table structure if it exists
-        if (tablesResult.rows.some(row => row.table_name === 'users')) {
+        if (tablesResult.rows.some((row) => row.table_name === 'users')) {
           const userTableResult = await client.query(`
             SELECT column_name, data_type, is_nullable
             FROM information_schema.columns
@@ -139,11 +157,15 @@ async function testSupabaseConnection() {
 
           console.log('  INFO - Users table structure:');
           for (const col of userTableResult.rows) {
-            console.log(`    COLUMN - ${col.column_name}: ${col.data_type}${col.is_nullable === 'NO' ? ' NOT NULL' : ''}`);
+            console.log(
+              `    COLUMN - ${col.column_name}: ${col.data_type}${col.is_nullable === 'NO' ? ' NOT NULL' : ''}`
+            );
           }
         }
       } else {
-        console.log('  INFO - No application tables found (run migration script to create them)');
+        console.log(
+          '  INFO - No application tables found (run migration script to create them)'
+        );
       }
     } catch (error) {
       console.log('  WARNING - Could not check tables:', error.message);
@@ -170,8 +192,12 @@ async function testSupabaseConnection() {
     const connInfo = connInfoResult.rows[0];
     console.log(`  INFO - Database: ${connInfo.database_name}`);
     console.log(`  INFO - User: ${connInfo.user_name}`);
-    console.log(`  INFO - PostgreSQL: ${connInfo.postgres_version.split(' ')[0]} ${connInfo.postgres_version.split(' ')[1]}`);
-    console.log(`  INFO - Server: ${connInfo.server_ip}:${connInfo.server_port}`);
+    console.log(
+      `  INFO - PostgreSQL: ${connInfo.postgres_version.split(' ')[0]} ${connInfo.postgres_version.split(' ')[1]}`
+    );
+    console.log(
+      `  INFO - Server: ${connInfo.server_ip}:${connInfo.server_port}`
+    );
 
     client.release();
 
@@ -184,24 +210,29 @@ async function testSupabaseConnection() {
     console.log('  PASSED - Search functions working');
     console.log('  PASSED - UUID generation working');
     console.log('  PASSED - Performance acceptable');
-
   } catch (error) {
     console.error('\nFAILED - Supabase connection test failed:');
     console.error(error.message);
 
     if (error.code === 'ENOTFOUND') {
       console.error('\nTROUBLESHOOT - Network Issues:');
-      console.error('  HELP - Check your SUPABASE_DB_URL_* environment variables');
+      console.error(
+        '  HELP - Check your SUPABASE_DB_URL_* environment variables'
+      );
       console.error('  HELP - Verify your Supabase project is running');
       console.error('  HELP - Check your internet connection');
     } else if (error.code === '28P01') {
       console.error('\nTROUBLESHOOT - Authentication Issues:');
-      console.error('  HELP - Check your database password in the connection string');
+      console.error(
+        '  HELP - Check your database password in the connection string'
+      );
       console.error('  HELP - Verify your Supabase database credentials');
     } else if (error.code === '3D000') {
       console.error('\nTROUBLESHOOT - Database Issues:');
       console.error('  HELP - The specified database does not exist');
-      console.error('  HELP - Check your database name in the connection string');
+      console.error(
+        '  HELP - Check your database name in the connection string'
+      );
     }
 
     process.exit(1);

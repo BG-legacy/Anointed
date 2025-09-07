@@ -13,7 +13,7 @@ const requestLogger = (logger) => {
         userAgent: req.get('User-Agent'),
         ip: req.ip,
       },
-      'Incoming request',
+      'Incoming request'
     );
 
     // Override res.end to log response
@@ -29,7 +29,7 @@ const requestLogger = (logger) => {
           duration: `${duration}ms`,
           contentLength: res.get('Content-Length'),
         },
-        'Request completed',
+        'Request completed'
       );
 
       originalEnd.apply(this, args);

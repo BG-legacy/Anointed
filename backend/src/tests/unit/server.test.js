@@ -4,9 +4,7 @@ import app from '../../server.js';
 describe('Server - Unit Tests', () => {
   describe('GET /health', () => {
     it('should return health status', async () => {
-      const response = await request(app)
-        .get('/health')
-        .expect(200);
+      const response = await request(app).get('/health').expect(200);
 
       expect(response.body).toHaveProperty('status', 'OK');
       expect(response.body).toHaveProperty('timestamp');
@@ -16,9 +14,7 @@ describe('Server - Unit Tests', () => {
 
   describe('GET /api/v1/healthz', () => {
     it('should return basic health check', async () => {
-      const response = await request(app)
-        .get('/api/v1/healthz')
-        .expect(200);
+      const response = await request(app).get('/api/v1/healthz').expect(200);
 
       expect(response.body).toHaveProperty('status', 'healthy');
       expect(response.body).toHaveProperty('timestamp');
@@ -29,9 +25,7 @@ describe('Server - Unit Tests', () => {
 
   describe('GET /api/v1/version', () => {
     it('should return version information', async () => {
-      const response = await request(app)
-        .get('/api/v1/version')
-        .expect(200);
+      const response = await request(app).get('/api/v1/version').expect(200);
 
       expect(response.body).toHaveProperty('version');
       expect(response.body).toHaveProperty('name');
@@ -43,9 +37,7 @@ describe('Server - Unit Tests', () => {
 
   describe('GET /api', () => {
     it('should return welcome message', async () => {
-      const response = await request(app)
-        .get('/api')
-        .expect(200);
+      const response = await request(app).get('/api').expect(200);
 
       expect(response.body).toHaveProperty('message', 'Welcome to the API');
       expect(response.body).toHaveProperty('version', '1.0.0');
@@ -54,9 +46,7 @@ describe('Server - Unit Tests', () => {
 
   describe('GET /nonexistent', () => {
     it('should return 404 for nonexistent routes', async () => {
-      const response = await request(app)
-        .get('/nonexistent')
-        .expect(404);
+      const response = await request(app).get('/nonexistent').expect(404);
 
       expect(response.body).toHaveProperty('success', false);
       expect(response.body).toHaveProperty('error');

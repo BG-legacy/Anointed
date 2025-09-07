@@ -37,7 +37,9 @@ class MagicLinkRepository {
         },
       });
 
-      logger.info(`Magic link created for user: ${linkData.userId}, purpose: ${linkData.purpose}`);
+      logger.info(
+        `Magic link created for user: ${linkData.userId}, purpose: ${linkData.purpose}`
+      );
       return magicLink;
     } catch (error) {
       logger.error('Error creating magic link:', error);
@@ -297,10 +299,15 @@ class MagicLinkRepository {
         data: { usedAt: new Date() },
       });
 
-      logger.info(`Magic links invalidated for user: ${userId}, purpose: ${purpose}, count: ${result.count}`);
+      logger.info(
+        `Magic links invalidated for user: ${userId}, purpose: ${purpose}, count: ${result.count}`
+      );
       return result;
     } catch (error) {
-      logger.error('Error invalidating magic links by user and purpose:', error);
+      logger.error(
+        'Error invalidating magic links by user and purpose:',
+        error
+      );
       throw error;
     }
   }
@@ -320,7 +327,9 @@ class MagicLinkRepository {
         data: { usedAt: new Date() },
       });
 
-      logger.info(`All magic links invalidated for user: ${userId}, count: ${result.count}`);
+      logger.info(
+        `All magic links invalidated for user: ${userId}, count: ${result.count}`
+      );
       return result;
     } catch (error) {
       logger.error('Error invalidating all magic links for user:', error);

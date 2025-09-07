@@ -6,7 +6,11 @@
 
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import prismaService from '../../services/prisma.js';
-import { UserRepository, UserSettingsRepository, DeviceRepository } from '../../repositories/index.js';
+import {
+  UserRepository,
+  UserSettingsRepository,
+  DeviceRepository,
+} from '../../repositories/index.js';
 
 describe('Prisma Integration', () => {
   let userRepo, settingsRepo, deviceRepo;
@@ -163,7 +167,7 @@ describe('Prisma Integration', () => {
       const originalLastSeen = testDevice.lastSeenAt;
 
       // Wait a bit to ensure timestamp difference
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       const updatedDevice = await deviceRepo.updateLastSeen(testDevice.id);
 
@@ -203,4 +207,3 @@ describe('Prisma Integration', () => {
     });
   });
 });
-

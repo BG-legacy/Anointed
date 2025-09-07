@@ -26,10 +26,12 @@ const app = express();
 app.use(helmet());
 
 // CORS middleware
-app.use(cors({
-  origin: config.corsOrigin,
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: config.corsOrigin,
+    credentials: true,
+  })
+);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
@@ -83,14 +85,18 @@ app.use(errorHandler(logger));
 let server;
 if (config.nodeEnv !== 'test') {
   // Initialize services before starting server
-  initializeServices().then(() => {
-    server = app.listen(config.port, () => {
-      logger.info(`Server running on port ${config.port} in ${config.nodeEnv} mode`);
+  initializeServices()
+    .then(() => {
+      server = app.listen(config.port, () => {
+        logger.info(
+          `Server running on port ${config.port} in ${config.nodeEnv} mode`
+        );
+      });
+    })
+    .catch((error) => {
+      logger.error('Failed to start server:', error);
+      process.exit(1);
     });
-  }).catch((error) => {
-    logger.error('Failed to start server:', error);
-    process.exit(1);
-  });
 }
 
 // Graceful shutdown
@@ -99,10 +105,7 @@ const gracefulShutdown = async (signal) => {
 
   try {
     // Close database and Redis connections
-    await Promise.all([
-      database.disconnect(),
-      redis.disconnect(),
-    ]);
+    await Promise.all([database.disconnect(), redis.disconnect()]);
 
     if (server) {
       server.close(() => {
@@ -112,7 +115,9 @@ const gracefulShutdown = async (signal) => {
 
       // Force close server after 30 seconds
       setTimeout(() => {
-        logger.error('Could not close connections in time, forcefully shutting down');
+        logger.error(
+          'Could not close connections in time, forcefully shutting down'
+        );
         process.exit(1);
       }, 30000);
     } else {

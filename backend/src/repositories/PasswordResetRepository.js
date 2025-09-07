@@ -201,10 +201,15 @@ class PasswordResetRepository {
         data: { usedAt: new Date() },
       });
 
-      logger.info(`Password reset token marked as used by hash, count: ${token.count}`);
+      logger.info(
+        `Password reset token marked as used by hash, count: ${token.count}`
+      );
       return token;
     } catch (error) {
-      logger.error('Error marking password reset token as used by hash:', error);
+      logger.error(
+        'Error marking password reset token as used by hash:',
+        error
+      );
       throw error;
     }
   }
@@ -224,10 +229,15 @@ class PasswordResetRepository {
         data: { usedAt: new Date() },
       });
 
-      logger.info(`All password reset tokens invalidated for user: ${userId}, count: ${result.count}`);
+      logger.info(
+        `All password reset tokens invalidated for user: ${userId}, count: ${result.count}`
+      );
       return result;
     } catch (error) {
-      logger.error('Error invalidating all password reset tokens for user:', error);
+      logger.error(
+        'Error invalidating all password reset tokens for user:',
+        error
+      );
       throw error;
     }
   }
@@ -244,7 +254,9 @@ class PasswordResetRepository {
         },
       });
 
-      logger.info(`Expired password reset tokens deleted, count: ${result.count}`);
+      logger.info(
+        `Expired password reset tokens deleted, count: ${result.count}`
+      );
       return result;
     } catch (error) {
       logger.error('Error deleting expired password reset tokens:', error);

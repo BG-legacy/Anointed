@@ -18,7 +18,8 @@ async function enableSupabaseExtensions() {
   let pool;
   try {
     // Create connection to Supabase
-    const dbUrl = config.supabase.databaseUrl[config.nodeEnv] || config.database.url;
+    const dbUrl =
+      config.supabase.databaseUrl[config.nodeEnv] || config.database.url;
     console.log('📡 Connecting to Supabase...');
 
     pool = new Pool({
@@ -35,7 +36,10 @@ async function enableSupabaseExtensions() {
     const extensions = [
       { name: 'uuid-ossp', description: 'UUID generation functions' },
       { name: 'pgcrypto', description: 'Cryptographic functions' },
-      { name: 'pg_trgm', description: 'Trigram similarity for fuzzy text search' },
+      {
+        name: 'pg_trgm',
+        description: 'Trigram similarity for fuzzy text search',
+      },
       { name: 'pg_stat_statements', description: 'Query execution statistics' },
       { name: 'btree_gin', description: 'GIN indexes for btree operations' },
     ];
@@ -49,9 +53,13 @@ async function enableSupabaseExtensions() {
         console.log(`  ✅ ${ext.name} - ${ext.description}`);
       } catch (error) {
         if (error.message.includes('permission denied')) {
-          console.log(`  ⚠️  ${ext.name} - Permission denied (may require Supabase Pro plan)`);
+          console.log(
+            `  ⚠️  ${ext.name} - Permission denied (may require Supabase Pro plan)`
+          );
         } else if (error.message.includes('does not exist')) {
-          console.log(`  ❌ ${ext.name} - Not available in this Supabase instance`);
+          console.log(
+            `  ❌ ${ext.name} - Not available in this Supabase instance`
+          );
         } else {
           console.log(`  ⚠️  ${ext.name} - ${error.message}`);
         }
@@ -72,16 +80,20 @@ async function enableSupabaseExtensions() {
     }
 
     // Check for missing extensions
-    const installedNames = finalCheck.rows.map(row => row.extname);
-    const requiredNames = extensions.map(ext => ext.name);
-    const missing = requiredNames.filter(name => !installedNames.includes(name));
+    const installedNames = finalCheck.rows.map((row) => row.extname);
+    const requiredNames = extensions.map((ext) => ext.name);
+    const missing = requiredNames.filter(
+      (name) => !installedNames.includes(name)
+    );
 
     if (missing.length > 0) {
       console.log('\n⚠️  Missing extensions:');
       for (const name of missing) {
         console.log(`  ❌ ${name}`);
       }
-      console.log('\nℹ️  Note: Some extensions may require a Supabase Pro plan or may not be available in managed Supabase instances.');
+      console.log(
+        '\nℹ️  Note: Some extensions may require a Supabase Pro plan or may not be available in managed Supabase instances.'
+      );
     } else {
       console.log('\n🎉 All required extensions are installed!');
     }
@@ -89,22 +101,28 @@ async function enableSupabaseExtensions() {
     // Set database parameters if possible
     console.log('\n⚙️  Setting database parameters...');
     try {
-      await client.query(`ALTER DATABASE ${client.database} SET statement_timeout = '10s';`);
+      await client.query(
+        `ALTER DATABASE ${client.database} SET statement_timeout = '10s';`
+      );
       console.log('  ✅ statement_timeout set to 10s');
     } catch (error) {
       console.log('  ⚠️  Could not set statement_timeout:', error.message);
     }
 
     try {
-      await client.query(`ALTER DATABASE ${client.database} SET idle_in_transaction_session_timeout = '10s';`);
+      await client.query(
+        `ALTER DATABASE ${client.database} SET idle_in_transaction_session_timeout = '10s';`
+      );
       console.log('  ✅ idle_in_transaction_session_timeout set to 10s');
     } catch (error) {
-      console.log('  ⚠️  Could not set idle_in_transaction_session_timeout:', error.message);
+      console.log(
+        '  ⚠️  Could not set idle_in_transaction_session_timeout:',
+        error.message
+      );
     }
 
     client.release();
     console.log('\n🎊 Extension setup completed!');
-
   } catch (error) {
     console.error('\n❌ Failed to enable extensions:');
     console.error(error.message);

@@ -86,7 +86,7 @@ describe('Authentication Flow Integration', () => {
       // Step 2: User clicks verification link
       const validLink = await magicLinkRepo.findValidTokenByPurpose(
         verificationLink.tokenHash,
-        'email_verification',
+        'email_verification'
       );
       expect(validLink).toBeTruthy();
 
@@ -121,7 +121,9 @@ describe('Authentication Flow Integration', () => {
       expect(resetToken.usedAt).toBeNull();
 
       // Step 2: User clicks reset link - validate token
-      const validReset = await passwordResetRepo.findValidToken(resetToken.tokenHash);
+      const validReset = await passwordResetRepo.findValidToken(
+        resetToken.tokenHash
+      );
       expect(validReset).toBeTruthy();
       expect(validReset.userId).toBe(testUser.id);
 
@@ -133,7 +135,9 @@ describe('Authentication Flow Integration', () => {
       expect(revokeResult.count).toBeGreaterThan(0);
 
       // Verify no valid refresh tokens remain
-      const validTokens = await refreshTokenRepo.findValidTokensByUserId(testUser.id);
+      const validTokens = await refreshTokenRepo.findValidTokensByUserId(
+        testUser.id
+      );
       expect(validTokens).toHaveLength(0);
 
       // Step 5: User logs in with new password, gets new refresh token
@@ -143,7 +147,8 @@ describe('Authentication Flow Integration', () => {
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       };
 
-      const newRefreshToken = await refreshTokenRepo.create(newRefreshTokenData);
+      const newRefreshToken =
+        await refreshTokenRepo.create(newRefreshTokenData);
       createdItems.push({ type: 'refreshToken', id: newRefreshToken.id });
 
       expect(newRefreshToken.revokedAt).toBeNull();
@@ -164,7 +169,7 @@ describe('Authentication Flow Integration', () => {
       // Step 2: User clicks magic link - validate and use
       const validMagicLink = await magicLinkRepo.findValidTokenByPurpose(
         magicLink.tokenHash,
-        'login',
+        'login'
       );
       expect(validMagicLink).toBeTruthy();
 
@@ -186,7 +191,9 @@ describe('Authentication Flow Integration', () => {
 
     it('should handle logout flow', async () => {
       // Get current valid refresh tokens
-      const validTokensBefore = await refreshTokenRepo.findValidTokensByUserId(testUser.id);
+      const validTokensBefore = await refreshTokenRepo.findValidTokensByUserId(
+        testUser.id
+      );
       expect(validTokensBefore.length).toBeGreaterThan(0);
 
       // Step 1: User logs out from specific device (revoke specific token)
@@ -201,7 +208,9 @@ describe('Authentication Flow Integration', () => {
       await refreshTokenRepo.revokeAllForUser(testUser.id);
 
       // Verify no valid tokens remain
-      const validTokensAfter = await refreshTokenRepo.findValidTokensByUserId(testUser.id);
+      const validTokensAfter = await refreshTokenRepo.findValidTokensByUserId(
+        testUser.id
+      );
       expect(validTokensAfter).toHaveLength(0);
     });
 
@@ -235,13 +244,19 @@ describe('Authentication Flow Integration', () => {
       createdItems.push(
         { type: 'refreshToken', id: refreshToken.id },
         { type: 'passwordReset', id: passwordReset.id },
-        { type: 'magicLink', id: magicLink.id },
+        { type: 'magicLink', id: magicLink.id }
       );
 
       // Verify tokens are valid
-      expect(await refreshTokenRepo.findValidToken(refreshToken.tokenHash)).toBeTruthy();
-      expect(await passwordResetRepo.findValidToken(passwordReset.tokenHash)).toBeTruthy();
-      expect(await magicLinkRepo.findValidToken(magicLink.tokenHash)).toBeTruthy();
+      expect(
+        await refreshTokenRepo.findValidToken(refreshToken.tokenHash)
+      ).toBeTruthy();
+      expect(
+        await passwordResetRepo.findValidToken(passwordReset.tokenHash)
+      ).toBeTruthy();
+      expect(
+        await magicLinkRepo.findValidToken(magicLink.tokenHash)
+      ).toBeTruthy();
 
       // Security response: Invalidate everything
       await Promise.all([
@@ -251,9 +266,15 @@ describe('Authentication Flow Integration', () => {
       ]);
 
       // Verify all tokens are invalid
-      expect(await refreshTokenRepo.findValidToken(refreshToken.tokenHash)).toBeNull();
-      expect(await passwordResetRepo.findValidToken(passwordReset.tokenHash)).toBeNull();
-      expect(await magicLinkRepo.findValidToken(magicLink.tokenHash)).toBeNull();
+      expect(
+        await refreshTokenRepo.findValidToken(refreshToken.tokenHash)
+      ).toBeNull();
+      expect(
+        await passwordResetRepo.findValidToken(passwordReset.tokenHash)
+      ).toBeNull();
+      expect(
+        await magicLinkRepo.findValidToken(magicLink.tokenHash)
+      ).toBeNull();
     });
 
     it('should handle rate limiting scenarios', async () => {
@@ -269,10 +290,15 @@ describe('Authentication Flow Integration', () => {
       }
 
       const resets = await Promise.all(resetPromises);
-      createdItems.push(...resets.map(reset => ({ type: 'passwordReset', id: reset.id })));
+      createdItems.push(
+        ...resets.map((reset) => ({ type: 'passwordReset', id: reset.id }))
+      );
 
       // Check recent attempts
-      const recentAttempts = await passwordResetRepo.getRecentAttemptsCount(testUser.id, 1);
+      const recentAttempts = await passwordResetRepo.getRecentAttemptsCount(
+        testUser.id,
+        1
+      );
       expect(recentAttempts).toBe(3);
 
       // Scenario: Rapid magic link requests
@@ -288,10 +314,16 @@ describe('Authentication Flow Integration', () => {
       }
 
       const links = await Promise.all(linkPromises);
-      createdItems.push(...links.map(link => ({ type: 'magicLink', id: link.id })));
+      createdItems.push(
+        ...links.map((link) => ({ type: 'magicLink', id: link.id }))
+      );
 
       // Check recent magic link attempts
-      const recentLinkAttempts = await magicLinkRepo.getRecentAttemptsCount(testUser.id, 'login', 1);
+      const recentLinkAttempts = await magicLinkRepo.getRecentAttemptsCount(
+        testUser.id,
+        'login',
+        1
+      );
       expect(recentLinkAttempts).toBe(2);
     });
 
@@ -324,7 +356,9 @@ describe('Authentication Flow Integration', () => {
 
       // Verify they exist but are not valid
       expect(await refreshTokenRepo.findById(expiredRefresh.id)).toBeTruthy();
-      expect(await refreshTokenRepo.findValidToken(expiredRefresh.tokenHash)).toBeNull();
+      expect(
+        await refreshTokenRepo.findValidToken(expiredRefresh.tokenHash)
+      ).toBeNull();
 
       // Run cleanup operations
       const refreshCleanup = await refreshTokenRepo.deleteExpired();
@@ -377,12 +411,12 @@ describe('Authentication Flow Integration', () => {
         { type: 'refreshToken', id: results[0].id },
         { type: 'refreshToken', id: results[1].id },
         { type: 'passwordReset', id: results[2].id },
-        { type: 'magicLink', id: results[3].id },
+        { type: 'magicLink', id: results[3].id }
       );
 
       // Verify all operations succeeded
       expect(results).toHaveLength(4);
-      results.forEach(result => {
+      results.forEach((result) => {
         expect(result).toHaveProperty('id');
         expect(result.userId).toBe(testUser.id);
       });

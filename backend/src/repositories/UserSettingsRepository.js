@@ -257,4 +257,3 @@ class UserSettingsRepository {
 }
 
 export default UserSettingsRepository;
-

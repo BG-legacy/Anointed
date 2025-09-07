@@ -26,6 +26,7 @@ A modern Express.js API with PostgreSQL 16, Redis 7, comprehensive testing, and 
 ### Development Setup
 
 1. **Clone and setup environment:**
+
    ```bash
    cd backend
    cp .env.example .env
@@ -33,12 +34,14 @@ A modern Express.js API with PostgreSQL 16, Redis 7, comprehensive testing, and 
    ```
 
 2. **Start services with Docker Compose:**
+
    ```bash
    cd ..  # Go to project root
    docker-compose up -d postgres redis
    ```
 
 3. **Start development server:**
+
    ```bash
    cd backend
    npm run dev
@@ -78,26 +81,31 @@ docker-compose down
 ## Testing
 
 ### Unit Tests
+
 ```bash
 npm run test:unit
 ```
 
 ### Integration Tests (with Testcontainers)
+
 ```bash
 npm run test:integration
 ```
 
 ### All Tests
+
 ```bash
 npm test
 ```
 
 ### Watch Mode
+
 ```bash
 npm run test:watch
 ```
 
 ### Coverage
+
 ```bash
 npm run test:coverage
 ```
@@ -105,12 +113,15 @@ npm run test:coverage
 ## Database
 
 ### Connection
+
 The app automatically connects to PostgreSQL using the `DATABASE_URL` environment variable.
 
 ### Migrations
+
 Initial database schema is created via `scripts/init.sql` when the container starts.
 
 ### Manual Database Operations
+
 ```bash
 # Connect to database
 docker-compose exec postgres psql -U postgres -d anointed
@@ -122,9 +133,11 @@ SELECT * FROM users;
 ## Redis
 
 ### Connection
+
 The app connects to Redis using the `REDIS_URL` environment variable.
 
 ### Manual Redis Operations
+
 ```bash
 # Connect to Redis
 docker-compose exec redis redis-cli
@@ -150,13 +163,14 @@ The GitHub Actions pipeline includes:
 
 1. **Install** dependencies
 2. **Lint** code (ESLint + Prettier)
-3. **Unit Tests** 
+3. **Unit Tests**
 4. **Integration Tests** with Testcontainers
 5. **Security Scan** with npm audit
 6. **Docker Build** test
 7. **Deploy** (staging/production)
 
 ### Pipeline Triggers
+
 - Push to `main` or `develop`
 - Pull requests to `main` or `develop`
 
@@ -212,13 +226,13 @@ graph TB
     API --> DB[(PostgreSQL 16)]
     API --> Cache[(Redis 7)]
     API --> Logs[Logging]
-    
+
     subgraph "Health Checks"
         API --> Health[/healthz]
         API --> Ready[/readyz]
         API --> Version[/version]
     end
-    
+
     subgraph "External Services"
         API --> Supabase[Supabase Storage]
         API --> Email[Email Service]
@@ -230,28 +244,31 @@ graph TB
 ### Common Issues
 
 1. **Database Connection Failed**
+
    ```bash
    # Check if PostgreSQL is running
    docker-compose ps postgres
-   
+
    # Check logs
    docker-compose logs postgres
    ```
 
 2. **Redis Connection Failed**
+
    ```bash
    # Check if Redis is running
    docker-compose ps redis
-   
+
    # Test connection
    docker-compose exec redis redis-cli ping
    ```
 
 3. **Tests Failing**
+
    ```bash
    # Make sure Docker is running for integration tests
    docker --version
-   
+
    # Clean and reinstall
    rm -rf node_modules package-lock.json
    npm install

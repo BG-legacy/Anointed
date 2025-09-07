@@ -19,8 +19,7 @@ describe('Database Integration Tests', () => {
       .start();
 
     // Start Redis container
-    redisContainer = await new RedisContainer('redis:7-alpine')
-      .start();
+    redisContainer = await new RedisContainer('redis:7-alpine').start();
 
     // Update environment variables
     originalDatabaseUrl = process.env.DATABASE_URL;
@@ -76,7 +75,7 @@ describe('Database Integration Tests', () => {
       // Insert test data
       const insertResult = await database.query(
         'INSERT INTO test_users (name, email) VALUES ($1, $2) RETURNING id',
-        ['Test User', 'test@example.com'],
+        ['Test User', 'test@example.com']
       );
 
       expect(insertResult.rows[0].id).toBeDefined();
@@ -84,7 +83,7 @@ describe('Database Integration Tests', () => {
       // Query test data
       const selectResult = await database.query(
         'SELECT * FROM test_users WHERE email = $1',
-        ['test@example.com'],
+        ['test@example.com']
       );
 
       expect(selectResult.rows[0].name).toBe('Test User');
@@ -121,7 +120,7 @@ describe('Database Integration Tests', () => {
       expect(exists).toBe(1);
 
       // Wait for expiration
-      await new Promise(resolve => setTimeout(resolve, 1100));
+      await new Promise((resolve) => setTimeout(resolve, 1100));
 
       exists = await redis.exists(testKey);
       expect(exists).toBe(0);
@@ -160,15 +159,14 @@ describe('Database Integration Tests', () => {
       `);
 
       // Insert test data
-      await database.query(
-        'INSERT INTO cached_data (name) VALUES ($1)',
-        ['Cached User'],
-      );
+      await database.query('INSERT INTO cached_data (name) VALUES ($1)', [
+        'Cached User',
+      ]);
 
       // Query database
       const dbResult = await database.query(
         'SELECT * FROM cached_data WHERE name = $1',
-        ['Cached User'],
+        ['Cached User']
       );
 
       // Cache the result

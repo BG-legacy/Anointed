@@ -39,7 +39,7 @@ class Database {
       } catch (paramError) {
         logger.warn(
           'Could not apply database session parameters:',
-          paramError.message,
+          paramError.message
         );
       }
 

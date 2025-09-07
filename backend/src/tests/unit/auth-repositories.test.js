@@ -104,20 +104,26 @@ describe('Authentication Repositories', () => {
       expect(foundToken.tokenHash).toBe(testToken.tokenHash);
 
       // Find by token hash
-      const foundByHash = await refreshTokenRepo.findByTokenHash(testToken.tokenHash);
+      const foundByHash = await refreshTokenRepo.findByTokenHash(
+        testToken.tokenHash
+      );
       expect(foundByHash).toBeTruthy();
       expect(foundByHash.id).toBe(testToken.id);
       expect(foundByHash.userId).toBe(testUser.id);
 
       // Find valid tokens by user ID
-      const validTokens = await refreshTokenRepo.findValidTokensByUserId(testUser.id);
+      const validTokens = await refreshTokenRepo.findValidTokensByUserId(
+        testUser.id
+      );
       expect(validTokens.length).toBeGreaterThanOrEqual(1);
-      const ourToken = validTokens.find(token => token.id === testToken.id);
+      const ourToken = validTokens.find((token) => token.id === testToken.id);
       expect(ourToken).toBeTruthy();
       expect(ourToken.revokedAt).toBeNull();
 
       // Validate token
-      const validToken = await refreshTokenRepo.findValidToken(testToken.tokenHash);
+      const validToken = await refreshTokenRepo.findValidToken(
+        testToken.tokenHash
+      );
       expect(validToken).toBeTruthy();
       expect(validToken.id).toBe(testToken.id);
       expect(validToken.revokedAt).toBeNull();
@@ -128,7 +134,9 @@ describe('Authentication Repositories', () => {
       expect(revokedToken.revokedAt).toBeInstanceOf(Date);
 
       // Should not find as valid anymore
-      const invalidToken = await refreshTokenRepo.findValidToken(testToken.tokenHash);
+      const invalidToken = await refreshTokenRepo.findValidToken(
+        testToken.tokenHash
+      );
       expect(invalidToken).toBeNull();
 
       // Count tokens
@@ -156,7 +164,9 @@ describe('Authentication Repositories', () => {
       createdTokens.push(token1, token2);
 
       // Verify they're valid
-      let validTokens = await refreshTokenRepo.findValidTokensByUserId(testUser.id);
+      let validTokens = await refreshTokenRepo.findValidTokensByUserId(
+        testUser.id
+      );
       expect(validTokens.length).toBeGreaterThanOrEqual(2);
 
       // Revoke all
@@ -180,11 +190,15 @@ describe('Authentication Repositories', () => {
       createdTokens.push(expiredToken);
 
       // Should not find as valid
-      const validToken = await refreshTokenRepo.findValidToken(expiredToken.tokenHash);
+      const validToken = await refreshTokenRepo.findValidToken(
+        expiredToken.tokenHash
+      );
       expect(validToken).toBeNull();
 
       // But should find in general search
-      const foundToken = await refreshTokenRepo.findByTokenHash(expiredToken.tokenHash);
+      const foundToken = await refreshTokenRepo.findByTokenHash(
+        expiredToken.tokenHash
+      );
       expect(foundToken).toBeTruthy();
     });
   });
@@ -208,23 +222,30 @@ describe('Authentication Repositories', () => {
       expect(testReset.user).toHaveProperty('email', testUser.email);
 
       // Find by token hash
-      const foundReset = await passwordResetRepo.findByTokenHash(testReset.tokenHash);
+      const foundReset = await passwordResetRepo.findByTokenHash(
+        testReset.tokenHash
+      );
       expect(foundReset).toBeTruthy();
       expect(foundReset.id).toBe(testReset.id);
       expect(foundReset.userId).toBe(testUser.id);
 
       // Find valid token
-      const validReset = await passwordResetRepo.findValidToken(testReset.tokenHash);
+      const validReset = await passwordResetRepo.findValidToken(
+        testReset.tokenHash
+      );
       expect(validReset).toBeTruthy();
       expect(validReset.id).toBe(testReset.id);
       expect(validReset.usedAt).toBeNull();
 
       // Find by user ID
       const userResets = await passwordResetRepo.findByUserId(testUser.id);
-      const validUserResets = await passwordResetRepo.findByUserId(testUser.id, true);
+      const validUserResets = await passwordResetRepo.findByUserId(
+        testUser.id,
+        true
+      );
       expect(userResets.length).toBeGreaterThanOrEqual(1);
       expect(validUserResets.length).toBeGreaterThanOrEqual(1);
-      const ourReset = userResets.find(reset => reset.id === testReset.id);
+      const ourReset = userResets.find((reset) => reset.id === testReset.id);
       expect(ourReset).toBeTruthy();
 
       // Mark as used
@@ -233,12 +254,17 @@ describe('Authentication Repositories', () => {
       expect(usedReset.usedAt).toBeInstanceOf(Date);
 
       // Should not find as valid anymore
-      const invalidReset = await passwordResetRepo.findValidToken(testReset.tokenHash);
+      const invalidReset = await passwordResetRepo.findValidToken(
+        testReset.tokenHash
+      );
       expect(invalidReset).toBeNull();
 
       // Count resets
       const totalCount = await passwordResetRepo.countForUser(testUser.id);
-      const validCount = await passwordResetRepo.countForUser(testUser.id, true);
+      const validCount = await passwordResetRepo.countForUser(
+        testUser.id,
+        true
+      );
       expect(totalCount).toBeGreaterThanOrEqual(1);
       expect(validCount).toBeLessThan(totalCount); // Should have fewer valid than total after use
     });
@@ -260,7 +286,10 @@ describe('Authentication Repositories', () => {
       const reset2 = await passwordResetRepo.create(resetData2);
       createdResets.push(reset1, reset2);
 
-      const recentCount = await passwordResetRepo.getRecentAttemptsCount(testUser.id, 1);
+      const recentCount = await passwordResetRepo.getRecentAttemptsCount(
+        testUser.id,
+        1
+      );
       expect(recentCount).toBeGreaterThanOrEqual(2);
     });
 
@@ -300,11 +329,15 @@ describe('Authentication Repositories', () => {
       createdResets.push(expiredReset);
 
       // Should not find as valid
-      const validReset = await passwordResetRepo.findValidToken(expiredReset.tokenHash);
+      const validReset = await passwordResetRepo.findValidToken(
+        expiredReset.tokenHash
+      );
       expect(validReset).toBeNull();
 
       // But should find in general search
-      const foundReset = await passwordResetRepo.findByTokenHash(expiredReset.tokenHash);
+      const foundReset = await passwordResetRepo.findByTokenHash(
+        expiredReset.tokenHash
+      );
       expect(foundReset).toBeTruthy();
     });
   });
@@ -342,24 +375,37 @@ describe('Authentication Repositories', () => {
       expect(validLink.usedAt).toBeNull();
 
       // Find valid link by purpose
-      const validByPurpose = await magicLinkRepo.findValidTokenByPurpose(testLink.tokenHash, 'login');
+      const validByPurpose = await magicLinkRepo.findValidTokenByPurpose(
+        testLink.tokenHash,
+        'login'
+      );
       expect(validByPurpose).toBeTruthy();
       expect(validByPurpose.id).toBe(testLink.id);
       expect(validByPurpose.purpose).toBe('login');
 
       // Should not find with wrong purpose
-      const wrongPurpose = await magicLinkRepo.findValidTokenByPurpose(testLink.tokenHash, 'signup');
+      const wrongPurpose = await magicLinkRepo.findValidTokenByPurpose(
+        testLink.tokenHash,
+        'signup'
+      );
       expect(wrongPurpose).toBeNull();
 
       // Find by user ID
       const userLinks = await magicLinkRepo.findByUserId(testUser.id);
-      const validUserLinks = await magicLinkRepo.findByUserId(testUser.id, true);
-      const loginLinks = await magicLinkRepo.findByUserId(testUser.id, true, 'login');
+      const validUserLinks = await magicLinkRepo.findByUserId(
+        testUser.id,
+        true
+      );
+      const loginLinks = await magicLinkRepo.findByUserId(
+        testUser.id,
+        true,
+        'login'
+      );
 
       expect(userLinks.length).toBeGreaterThanOrEqual(1);
       expect(validUserLinks.length).toBeGreaterThanOrEqual(1);
       expect(loginLinks.length).toBeGreaterThanOrEqual(1);
-      const ourLink = userLinks.find(link => link.id === testLink.id);
+      const ourLink = userLinks.find((link) => link.id === testLink.id);
       expect(ourLink).toBeTruthy();
 
       // Find by purpose
@@ -368,7 +414,9 @@ describe('Authentication Repositories', () => {
       expect(allLoginLinks.length).toBeGreaterThan(0);
       expect(validLoginLinks.length).toBeGreaterThan(0);
 
-      const ourLinkByPurpose = allLoginLinks.find(link => link.id === testLink.id);
+      const ourLinkByPurpose = allLoginLinks.find(
+        (link) => link.id === testLink.id
+      );
       expect(ourLinkByPurpose).toBeTruthy();
 
       // Mark as used
@@ -377,13 +425,19 @@ describe('Authentication Repositories', () => {
       expect(usedLink.usedAt).toBeInstanceOf(Date);
 
       // Should not find as valid anymore
-      const invalidLink = await magicLinkRepo.findValidToken(testLink.tokenHash);
+      const invalidLink = await magicLinkRepo.findValidToken(
+        testLink.tokenHash
+      );
       expect(invalidLink).toBeNull();
 
       // Count links
       const totalCount = await magicLinkRepo.countForUser(testUser.id);
       const validCount = await magicLinkRepo.countForUser(testUser.id, true);
-      const loginCount = await magicLinkRepo.countForUser(testUser.id, false, 'login');
+      const loginCount = await magicLinkRepo.countForUser(
+        testUser.id,
+        false,
+        'login'
+      );
 
       expect(totalCount).toBeGreaterThanOrEqual(1);
       expect(validCount).toBeLessThan(totalCount); // Should have fewer valid than total after use
@@ -411,7 +465,10 @@ describe('Authentication Repositories', () => {
 
       // Test purpose-specific queries
       const signupLinks = await magicLinkRepo.findByPurpose('signup', true);
-      const verifyLinks = await magicLinkRepo.findByPurpose('email_verification', true);
+      const verifyLinks = await magicLinkRepo.findByPurpose(
+        'email_verification',
+        true
+      );
 
       expect(signupLinks).toHaveLength(1);
       expect(verifyLinks).toHaveLength(1);
@@ -439,23 +496,42 @@ describe('Authentication Repositories', () => {
       createdLinks.push(link1, link2);
 
       // Verify they're valid
-      let validSignupLinks = await magicLinkRepo.findByUserId(testUser.id, true, 'signup');
+      let validSignupLinks = await magicLinkRepo.findByUserId(
+        testUser.id,
+        true,
+        'signup'
+      );
       expect(validSignupLinks.length).toBeGreaterThan(0);
 
       // Invalidate only signup links
-      const result = await magicLinkRepo.invalidateByUserAndPurpose(testUser.id, 'signup');
+      const result = await magicLinkRepo.invalidateByUserAndPurpose(
+        testUser.id,
+        'signup'
+      );
       expect(result.count).toBeGreaterThan(0);
 
       // Verify signup links are invalid but others remain
-      validSignupLinks = await magicLinkRepo.findByUserId(testUser.id, true, 'signup');
+      validSignupLinks = await magicLinkRepo.findByUserId(
+        testUser.id,
+        true,
+        'signup'
+      );
       expect(validSignupLinks).toHaveLength(0);
 
-      const validVerifyLinks = await magicLinkRepo.findByUserId(testUser.id, true, 'email_verification');
+      const validVerifyLinks = await magicLinkRepo.findByUserId(
+        testUser.id,
+        true,
+        'email_verification'
+      );
       expect(validVerifyLinks.length).toBeGreaterThan(0);
     });
 
     it('should track recent attempts', async () => {
-      const recentCount = await magicLinkRepo.getRecentAttemptsCount(testUser.id, 'login', 1);
+      const recentCount = await magicLinkRepo.getRecentAttemptsCount(
+        testUser.id,
+        'login',
+        1
+      );
       expect(recentCount).toBeGreaterThan(0);
     });
 
@@ -472,11 +548,15 @@ describe('Authentication Repositories', () => {
       createdLinks.push(expiredLink);
 
       // Should not find as valid
-      const validLink = await magicLinkRepo.findValidToken(expiredLink.tokenHash);
+      const validLink = await magicLinkRepo.findValidToken(
+        expiredLink.tokenHash
+      );
       expect(validLink).toBeNull();
 
       // But should find in general search
-      const foundLink = await magicLinkRepo.findByTokenHash(expiredLink.tokenHash);
+      const foundLink = await magicLinkRepo.findByTokenHash(
+        expiredLink.tokenHash
+      );
       expect(foundLink).toBeTruthy();
     });
   });
@@ -550,7 +630,9 @@ describe('Authentication Repositories', () => {
       });
 
       // Verify all tokens can be found
-      const userTokens = await refreshTokenRepo.findValidTokensByUserId(testUser.id);
+      const userTokens = await refreshTokenRepo.findValidTokensByUserId(
+        testUser.id
+      );
       expect(userTokens.length).toBeGreaterThanOrEqual(5);
     });
   });

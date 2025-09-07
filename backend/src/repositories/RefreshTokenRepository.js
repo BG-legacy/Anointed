@@ -194,7 +194,9 @@ class RefreshTokenRepository {
         data: { revokedAt: new Date() },
       });
 
-      logger.info(`All refresh tokens revoked for user: ${userId}, count: ${result.count}`);
+      logger.info(
+        `All refresh tokens revoked for user: ${userId}, count: ${result.count}`
+      );
       return result;
     } catch (error) {
       logger.error('Error revoking all tokens for user:', error);

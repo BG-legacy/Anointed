@@ -21,8 +21,7 @@ describe('Health Routes Integration Tests', () => {
       .start();
 
     // Start Redis container
-    redisContainer = await new RedisContainer('redis:7-alpine')
-      .start();
+    redisContainer = await new RedisContainer('redis:7-alpine').start();
 
     // Update environment variables
     originalDatabaseUrl = process.env.DATABASE_URL;
@@ -52,9 +51,7 @@ describe('Health Routes Integration Tests', () => {
 
   describe('GET /api/v1/healthz', () => {
     test('should return healthy status', async () => {
-      const response = await request(app)
-        .get('/api/v1/healthz')
-        .expect(200);
+      const response = await request(app).get('/api/v1/healthz').expect(200);
 
       expect(response.body).toMatchObject({
         status: 'healthy',
@@ -67,9 +64,7 @@ describe('Health Routes Integration Tests', () => {
 
   describe('GET /api/v1/readyz', () => {
     test('should return ready status when services are healthy', async () => {
-      const response = await request(app)
-        .get('/api/v1/readyz')
-        .expect(200);
+      const response = await request(app).get('/api/v1/readyz').expect(200);
 
       expect(response.body).toMatchObject({
         status: 'ready',
@@ -87,9 +82,7 @@ describe('Health Routes Integration Tests', () => {
       // Disconnect database
       await database.disconnect();
 
-      const response = await request(app)
-        .get('/api/v1/readyz')
-        .expect(503);
+      const response = await request(app).get('/api/v1/readyz').expect(503);
 
       expect(response.body).toMatchObject({
         status: 'not ready',
@@ -107,9 +100,7 @@ describe('Health Routes Integration Tests', () => {
       // Disconnect Redis
       await redis.disconnect();
 
-      const response = await request(app)
-        .get('/api/v1/readyz')
-        .expect(503);
+      const response = await request(app).get('/api/v1/readyz').expect(503);
 
       expect(response.body).toMatchObject({
         status: 'not ready',
@@ -126,9 +117,7 @@ describe('Health Routes Integration Tests', () => {
 
   describe('GET /api/v1/version', () => {
     test('should return version information', async () => {
-      const response = await request(app)
-        .get('/api/v1/version')
-        .expect(200);
+      const response = await request(app).get('/api/v1/version').expect(200);
 
       expect(response.body).toMatchObject({
         version: expect.any(String),
