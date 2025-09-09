@@ -35,6 +35,22 @@ model User {
   refreshTokens  RefreshToken[]
   passwordResets PasswordReset[]
   magicLinks     MagicLink[]
+  createdGroups    Group[]       @relation("GroupCreator")
+  groupMemberships GroupMember[] @relation("GroupMembership")
+  posts            Post[]        @relation("UserPosts")
+  comments         Comment[]     @relation("UserComments")
+  reactions        Reaction[]    @relation("UserReactions")
+  prayers          Prayer[]      @relation("UserPrayers")
+  prayerCommits    PrayerCommit[] @relation("UserPrayerCommits")
+  xpEvents         XpEvent[]     @relation("UserXpEvents")
+  xpTotals         XpTotals?     @relation("UserXpTotals")
+  streaks          Streak[]      @relation("UserStreaks")
+  aiResponses      AIResponse[]  @relation("UserAIResponses")
+  aiUsage          AIUsage[]     @relation("UserAIUsage")
+  createdEvents    Event[]       @relation("EventCreator")
+  eventRsvps       EventRsvp[]   @relation("UserEventRsvps")
+  mentorships      Mentorship[]  @relation("MentorRelationships")
+  menteeships      Mentorship[]  @relation("MenteeRelationships")
 
   @@map("users")
 }
@@ -133,4 +149,463 @@ model MagicLink {
   @@index([purpose])
   @@index([expiresAt])
   @@map("magic_links")
+}
+
+// =============================================================================
+// SOCIAL & COMMUNITY
+// =============================================================================
+
+enum GroupPrivacy {
+  PUBLIC
+  PRIVATE
+}
+
+enum GroupMemberRole {
+  ADMIN
+  MODERATOR
+  MEMBER
+}
+
+enum PostType {
+  POST
+  TESTIMONY
+}
+
+enum PostStatus {
+  ACTIVE
+  REMOVED
+  PENDING_MOD
+}
+
+enum ReactionType {
+  LIKE
+  AMEN
+  PRAYER
+}
+
+enum PrayerStatus {
+  OPEN
+  ANSWERED
+  ARCHIVED
+}
+
+enum Fruit {
+  LOVE
+  JOY
+  PEACE
+  PATIENCE
+  KINDNESS
+  GOODNESS
+  FAITHFULNESS
+  GENTLENESS
+  SELF_CONTROL
+}
+
+enum StreakKind {
+  PRAYER
+  SCRIPTURE
+  WELLNESS
+}
+
+enum AIResponseKind {
+  DEVOTIONAL
+  PRAYER
+}
+
+enum EventVisibility {
+  PUBLIC
+  GROUP
+  PRIVATE
+}
+
+enum RsvpStatus {
+  GOING
+  INTERESTED
+  DECLINED
+}
+
+enum MentorshipStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+model Group {
+  id          String       @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  privacy     GroupPrivacy @default(PUBLIC)
+  createdBy   String       @map("created_by") @db.Uuid
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  deletedAt   DateTime?    @map("deleted_at") // Soft delete
+
+  // Relations
+  creator User          @relation("GroupCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  members GroupMember[]
+  posts   Post[]        @relation("GroupPosts")
+  prayers Prayer[]      @relation("GroupPrayers")
+  events  Event[]       @relation("GroupEvents")
+
+  // Indexes
+  @@index([createdBy])
+  @@index([privacy])
+  @@index([createdAt])
+  @@map("groups")
+}
+
+model GroupMember {
+  groupId  String          @map("group_id") @db.Uuid
+  userId   String          @map("user_id") @db.Uuid
+  role     GroupMemberRole @default(MEMBER)
+  joinedAt DateTime        @default(now()) @map("joined_at")
+
+  // Relations
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user  User  @relation("GroupMembership", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Composite primary key
+  @@id([groupId, userId])
+  @@index([userId])
+  @@index([role])
+  @@map("group_members")
+}
+
+model Post {
+  id            String     @id @default(uuid()) @db.Uuid
+  userId        String     @map("user_id") @db.Uuid
+  groupId       String?    @map("group_id") @db.Uuid
+  type          PostType   @default(POST)
+  content       String     @db.Text
+  mediaUrls     Json?      @map("media_urls") // JSONB array of media URLs
+  status        PostStatus @default(ACTIVE)
+  commentCount  Int        @default(0) @map("comment_count")
+  reactionCount Int        @default(0) @map("reaction_count")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  deletedAt     DateTime?  @map("deleted_at") // Soft delete
+
+  // Relations
+  user      User       @relation("UserPosts", fields: [userId], references: [id], onDelete: Cascade)
+  group     Group?     @relation("GroupPosts", fields: [groupId], references: [id], onDelete: SetNull)
+  comments  Comment[]
+  reactions Reaction[]
+  linkedPrayers Prayer[] @relation("PrayerLinkedPost")
+
+  // Indexes
+  @@index([userId])
+  @@index([groupId])
+  @@index([type])
+  @@index([status])
+  @@index([createdAt])
+  @@map("posts")
+}
+
+model Comment {
+  id        String    @id @default(uuid()) @db.Uuid
+  postId    String    @map("post_id") @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  content   String    @db.Text
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  deletedAt DateTime? @map("deleted_at") // Soft delete
+
+  // Relations
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([postId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("comments")
+}
+
+model Reaction {
+  id        String      @id @default(uuid()) @db.Uuid
+  postId    String      @map("post_id") @db.Uuid
+  userId    String      @map("user_id") @db.Uuid
+  type      ReactionType
+  createdAt DateTime    @default(now()) @map("created_at")
+
+  // Relations
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation("UserReactions", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Unique constraint as specified
+  @@unique([postId, userId, type], name: "unique_post_user_reaction")
+  @@index([postId])
+  @@index([userId])
+  @@index([type])
+  @@map("reactions")
+}
+
+// =============================================================================
+// PRAYER SYSTEM
+// =============================================================================
+
+model Prayer {
+  id            String       @id @default(uuid()) @db.Uuid
+  userId        String       @map("user_id") @db.Uuid
+  groupId       String?      @map("group_id") @db.Uuid
+  linkedPostId  String?      @map("linked_post_id") @db.Uuid
+  title         String
+  content       String       @db.Text
+  status        PrayerStatus @default(OPEN)
+  commitCount   Int          @default(0) @map("commit_count")
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime     @updatedAt @map("updated_at")
+  deletedAt     DateTime?    @map("deleted_at") // Soft delete
+
+  // Relations
+  user       User           @relation("UserPrayers", fields: [userId], references: [id], onDelete: Cascade)
+  group      Group?         @relation("GroupPrayers", fields: [groupId], references: [id], onDelete: SetNull)
+  linkedPost Post?          @relation("PrayerLinkedPost", fields: [linkedPostId], references: [id], onDelete: SetNull)
+  commits    PrayerCommit[]
+
+  // Indexes
+  @@index([userId])
+  @@index([groupId])
+  @@index([linkedPostId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("prayers")
+}
+
+model PrayerCommit {
+  id       String    @id @default(uuid()) @db.Uuid
+  prayerId String    @map("prayer_id") @db.Uuid
+  userId   String    @map("user_id") @db.Uuid
+  message  String?   @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  prayer Prayer @relation(fields: [prayerId], references: [id], onDelete: Cascade)
+  user   User   @relation("UserPrayerCommits", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([prayerId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("prayer_commits")
+}
+
+// =============================================================================
+// XP & STREAKS SYSTEM
+// =============================================================================
+
+model XpEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  fruit     Fruit
+  amount    Int
+  reason    String
+  metadata  Json?    // JSONB for additional context
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation("UserXpEvents", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@index([fruit])
+  @@index([createdAt])
+  @@map("xp_events")
+}
+
+model XpTotals {
+  userId      String   @id @map("user_id") @db.Uuid
+  love        Int      @default(0)
+  joy         Int      @default(0)
+  peace       Int      @default(0)
+  patience    Int      @default(0)
+  kindness    Int      @default(0)
+  goodness    Int      @default(0)
+  faithfulness Int     @default(0)
+  gentleness  Int      @default(0)
+  selfControl Int      @default(0) @map("self_control")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation("UserXpTotals", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("xp_totals")
+}
+
+model Streak {
+  id      String     @id @default(uuid()) @db.Uuid
+  userId  String     @map("user_id") @db.Uuid
+  kind    StreakKind
+  current Int        @default(0)
+  longest Int        @default(0)
+  lastAt  DateTime?  @map("last_at")
+
+  // Relations
+  user User @relation("UserStreaks", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Constraints
+  @@unique([userId, kind], name: "unique_user_streak_kind")
+  @@index([userId])
+  @@index([kind])
+  @@map("streaks")
+}
+
+// =============================================================================
+// AI SYSTEM
+// =============================================================================
+
+model AIResponse {
+  id              String          @id @default(uuid()) @db.Uuid
+  userId          String?         @map("user_id") @db.Uuid
+  kind            AIResponseKind
+  prompt          Json            // JSONB for the input prompt
+  output          String          @db.Text
+  allowed         Boolean         @default(true)
+  flags           Json?           // JSONB for any flags or metadata
+  templateVersion String?         @map("template_version")
+  latencyMs       Int             @map("latency_ms")
+  costUsd         Decimal         @map("cost_usd") @db.Decimal(10,4)
+  createdAt       DateTime        @default(now()) @map("created_at")
+
+  // Relations
+  user           User?            @relation("UserAIResponses", fields: [userId], references: [id], onDelete: SetNull)
+  scriptureRefs  ScriptureRef[]
+
+  // Indexes
+  @@index([userId])
+  @@index([kind])
+  @@index([allowed])
+  @@index([createdAt])
+  @@map("ai_responses")
+}
+
+model ScriptureRef {
+  id           String     @id @default(uuid()) @db.Uuid
+  aiResponseId String     @map("ai_response_id") @db.Uuid
+  book         String
+  chapter      Int
+  verseStart   Int        @map("verse_start")
+  verseEnd     Int        @map("verse_end")
+
+  // Relations
+  aiResponse AIResponse @relation(fields: [aiResponseId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([aiResponseId])
+  @@index([book])
+  @@index([chapter])
+  @@map("scripture_refs")
+}
+
+model AIUsage {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  provider  String
+  model     String
+  tokensIn  Int      @map("tokens_in")
+  tokensOut Int      @map("tokens_out")
+  costUsd   Decimal  @map("cost_usd") @db.Decimal(10,4)
+  latencyMs Int      @map("latency_ms")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User? @relation("UserAIUsage", fields: [userId], references: [id], onDelete: SetNull)
+
+  // Indexes
+  @@index([userId])
+  @@index([provider])
+  @@index([model])
+  @@index([createdAt])
+  @@map("ai_usage")
+}
+
+// =============================================================================
+// EVENTS & MENTORSHIP
+// =============================================================================
+
+model Event {
+  id          String          @id @default(uuid()) @db.Uuid
+  title       String
+  description String?         @db.Text
+  startsAt    DateTime        @map("starts_at")
+  endsAt      DateTime        @map("ends_at")
+  location    String?
+  visibility  EventVisibility @default(PUBLIC)
+  groupId     String?         @map("group_id") @db.Uuid
+  createdBy   String          @map("created_by") @db.Uuid
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  // Relations
+  creator User         @relation("EventCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  group   Group?       @relation("GroupEvents", fields: [groupId], references: [id], onDelete: SetNull)
+  rsvps   EventRsvp[]
+
+  // Indexes
+  @@index([createdBy])
+  @@index([groupId])
+  @@index([visibility])
+  @@index([startsAt])
+  @@index([endsAt])
+  @@map("events")
+}
+
+model EventRsvp {
+  eventId   String     @map("event_id") @db.Uuid
+  userId    String     @map("user_id") @db.Uuid
+  status    RsvpStatus
+  createdAt DateTime   @default(now()) @map("created_at")
+
+  // Relations
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation("UserEventRsvps", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Composite primary key
+  @@id([eventId, userId])
+  @@index([userId])
+  @@index([status])
+  @@map("event_rsvps")
+}
+
+model Mentorship {
+  id        String           @id @default(uuid()) @db.Uuid
+  mentorId  String           @map("mentor_id") @db.Uuid
+  menteeId  String           @map("mentee_id") @db.Uuid
+  startedAt DateTime         @default(now()) @map("started_at")
+  status    MentorshipStatus @default(ACTIVE)
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  // Relations
+  mentor   User            @relation("MentorRelationships", fields: [mentorId], references: [id], onDelete: Cascade)
+  mentee   User            @relation("MenteeRelationships", fields: [menteeId], references: [id], onDelete: Cascade)
+  sessions MentorSession[]
+
+  // Constraints
+  @@unique([mentorId, menteeId], name: "unique_mentorship")
+  
+  // Indexes
+  @@index([mentorId])
+  @@index([menteeId])
+  @@index([status])
+  @@map("mentorships")
+}
+
+model MentorSession {
+  id            String     @id @default(uuid()) @db.Uuid
+  mentorshipId  String     @map("mentorship_id") @db.Uuid
+  scheduledAt   DateTime   @map("scheduled_at")
+  notes         String?    @db.Text
+  completedAt   DateTime?  @map("completed_at")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  mentorship Mentorship @relation(fields: [mentorshipId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([mentorshipId])
+  @@index([scheduledAt])
+  @@index([completedAt])
+  @@map("mentor_sessions")
 }
