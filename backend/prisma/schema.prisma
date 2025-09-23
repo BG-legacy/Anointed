@@ -51,6 +51,9 @@ model User {
   eventRsvps       EventRsvp[]   @relation("UserEventRsvps")
   mentorships      Mentorship[]  @relation("MentorRelationships")
   menteeships      Mentorship[]  @relation("MenteeRelationships")
+  moderationActions ModerationAction[] @relation("UserModerationActions")
+  auditLogs        AuditLog[]    @relation("UserAuditLogs")
+  notifications    Notification[] @relation("UserNotifications")
 
   @@map("users")
 }
@@ -228,6 +231,13 @@ enum MentorshipStatus {
   ACTIVE
   PAUSED
   COMPLETED
+}
+
+enum ModerationActionType {
+  APPROVE
+  REJECT
+  REMOVE
+  BAN
 }
 
 model Group {
@@ -608,4 +618,85 @@ model MentorSession {
   @@index([scheduledAt])
   @@index([completedAt])
   @@map("mentor_sessions")
+}
+
+// =============================================================================
+// MODERATION & AUDIT SYSTEM
+// =============================================================================
+
+model ModerationAction {
+  id         String               @id @default(uuid()) @db.Uuid
+  entityType String               @map("entity_type") // Type of entity being moderated (e.g., "post", "comment", "user")
+  entityId   String               @map("entity_id") @db.Uuid // ID of the entity being moderated
+  actorId    String               @map("actor_id") @db.Uuid // User performing the moderation action
+  action     ModerationActionType
+  notes      String?              @db.Text // Optional notes about the moderation action
+  createdAt  DateTime             @default(now()) @map("created_at")
+
+  // Relations
+  actor User @relation("UserModerationActions", fields: [actorId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([entityType])
+  @@index([entityId])
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("moderation_actions")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid // Optional - actions can be system-initiated
+  action     String   // Description of the action performed
+  entityType String   @map("entity_type") // Type of entity affected
+  entityId   String   @map("entity_id") @db.Uuid // ID of the entity affected
+  metadata   Json?    // JSONB for additional context and details
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User? @relation("UserAuditLogs", fields: [userId], references: [id], onDelete: SetNull)
+
+  // Indexes
+  @@index([userId])
+  @@index([action])
+  @@index([entityType])
+  @@index([entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// =============================================================================
+// NOTIFICATION & FEATURE FLAG SYSTEM
+// =============================================================================
+
+model Notification {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  type      String    // Type of notification (e.g., "prayer_request", "mention", "group_invite")
+  payload   Json      // JSONB for notification data
+  read      Boolean   @default(false)
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at") // Soft delete
+
+  // Relations
+  user User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  // Indexes
+  @@index([userId])
+  @@index([type])
+  @@index([read])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model FeatureFlag {
+  key       String    @id // Primary key as string
+  enabled   Boolean   @default(false)
+  payload   Json?     // Optional JSONB for additional configuration
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  // Indexes
+  @@index([enabled])
+  @@map("feature_flags")
 }
