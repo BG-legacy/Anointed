@@ -251,7 +251,7 @@ model Group {
   deletedAt   DateTime?    @map("deleted_at") // Soft delete
 
   // Relations
-  creator User          @relation("GroupCreator", fields: [createdBy], references: [id], onDelete: Cascade)
+  creator User          @relation("GroupCreator", fields: [createdBy], references: [id], onDelete: Restrict)
   members GroupMember[]
   posts   Post[]        @relation("GroupPosts")
   prayers Prayer[]      @relation("GroupPrayers")
@@ -296,7 +296,7 @@ model Post {
   deletedAt     DateTime?  @map("deleted_at") // Soft delete
 
   // Relations
-  user      User       @relation("UserPosts", fields: [userId], references: [id], onDelete: Cascade)
+  user      User       @relation("UserPosts", fields: [userId], references: [id], onDelete: Restrict)
   group     Group?     @relation("GroupPosts", fields: [groupId], references: [id], onDelete: SetNull)
   comments  Comment[]
   reactions Reaction[]
