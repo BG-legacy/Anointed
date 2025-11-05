@@ -276,6 +276,7 @@ model GroupMember {
 
   // Composite primary key
   @@id([groupId, userId])
+  @@index([groupId])
   @@index([userId])
   @@index([role])
   @@map("group_members")
@@ -291,6 +292,7 @@ model Post {
   status        PostStatus @default(ACTIVE)
   commentCount  Int        @default(0) @map("comment_count")
   reactionCount Int        @default(0) @map("reaction_count")
+  searchTsv     Unsupported("tsvector")? @map("search_tsv") // Generated column for full-text search
   createdAt     DateTime   @default(now()) @map("created_at")
   updatedAt     DateTime   @updatedAt @map("updated_at")
   deletedAt     DateTime?  @map("deleted_at") // Soft delete
@@ -308,6 +310,11 @@ model Post {
   @@index([type])
   @@index([status])
   @@index([createdAt])
+  // Covering indexes for common query patterns
+  @@index([groupId, createdAt(sort: Desc)], map: "posts_group_created_desc")
+  @@index([userId, createdAt(sort: Desc)], map: "posts_user_created_desc")
+  //Gin index for JSONB column filtering
+  @@index([mediaUrls], type: Gin, map: "posts_media_urls_gin")
   @@map("posts")
 }
 
@@ -328,6 +335,8 @@ model Comment {
   @@index([postId])
   @@index([userId])
   @@index([createdAt])
+  // Covering index for common query pattern
+  @@index([postId, createdAt(sort: Asc)], map: "comments_post_created_asc")
   @@map("comments")
 }
 
@@ -420,6 +429,9 @@ model XpEvent {
   @@index([userId])
   @@index([fruit])
   @@index([createdAt])
+  // Covering indexes for common query patterns
+  @@index([userId, createdAt(sort: Desc)], map: "xp_events_user_created_desc")
+  @@index([fruit, createdAt(sort: Desc)], map: "xp_events_fruit_created_desc")
   @@map("xp_events")
 }
 
@@ -486,6 +498,8 @@ model AIResponse {
   @@index([kind])
   @@index([allowed])
   @@index([createdAt])
+  // GIN index for JSONB column filtering
+  @@index([flags], type: Gin, map: "ai_responses_flags_gin")
   @@map("ai_responses")
 }
 
@@ -557,6 +571,8 @@ model Event {
   @@index([visibility])
   @@index([startsAt])
   @@index([endsAt])
+  // Covering index for common query pattern
+  @@index([startsAt(sort: Asc)], map: "events_starts_at_asc")
   @@map("events")
 }
 
@@ -572,6 +588,7 @@ model EventRsvp {
 
   // Composite primary key
   @@id([eventId, userId])
+  @@index([eventId])
   @@index([userId])
   @@index([status])
   @@map("event_rsvps")
@@ -642,6 +659,8 @@ model ModerationAction {
   @@index([actorId])
   @@index([action])
   @@index([createdAt])
+  // Covering index for common query pattern
+  @@index([entityType, createdAt(sort: Desc)], map: "moderation_actions_entity_created_desc")
   @@map("moderation_actions")
 }
 
@@ -663,6 +682,8 @@ model AuditLog {
   @@index([entityType])
   @@index([entityId])
   @@index([createdAt])
+  // GIN index for JSONB column filtering
+  @@index([metadata], type: Gin, map: "audit_logs_metadata_gin")
   @@map("audit_logs")
 }
 
@@ -687,6 +708,10 @@ model Notification {
   @@index([type])
   @@index([read])
   @@index([createdAt])
+  // Covering index for common query pattern
+  @@index([userId, createdAt(sort: Desc)], map: "notifications_user_created_desc")
+  // GIN index for JSONB column filtering
+  @@index([payload], type: Gin, map: "notifications_payload_gin")
   @@map("notifications")
 }
 
